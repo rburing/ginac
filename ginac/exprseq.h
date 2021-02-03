@@ -31,6 +31,9 @@ namespace GiNaC {
 
 typedef container<std::vector> exprseq;
 
+/** Definition of container::reg_info for exprseq. */
+template<> registered_class_info exprseq::reg_info;
+
 // defined in exprseq.cpp
 template<> bool exprseq::info(unsigned inf) const;
 

@@ -31,6 +31,9 @@ namespace GiNaC {
 
 typedef container<std::list> lst;
 
+/** Definition of container::reg_info for lst. */
+template<> registered_class_info lst::reg_info;
+
 /** Specialization of container::get_default_flags() for lst. */
 template<> inline unsigned lst::get_default_flags() { return status_flags::not_shareable; }
 
