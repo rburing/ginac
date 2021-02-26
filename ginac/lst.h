@@ -31,7 +31,7 @@ namespace GiNaC {
 
 typedef container<std::list> lst;
 
-/** Definition of container::reg_info for lst. */
+/** Declaration of container::reg_info for lst. */
 template<> registered_class_info lst::reg_info;
 
 /** Specialization of container::get_default_flags() for lst. */
