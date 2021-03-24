@@ -1013,21 +1013,25 @@ G_do_hoelder(std::vector<cln::cl_N> x, /* yes, it's passed by value */
 	for (std::size_t i = 0; i < size; ++i)
 		x[i] = x[i]/y;
 
+        // 24.03.2021: this block can be outside the loop over r 
+	cln::cl_RA p(2);
+	bool adjustp;
+	do {
+		adjustp = false;
+		for (std::size_t i = 0; i < size; ++i) {
+                        // 24.03.2021: replaced (x[i] == cln::cl_RA(1)/p) by (cln::zerop(x[i] - cln::cl_RA(1)/p)
+                        //             in the case where we compare a float with a rational, CLN behaves differently in the two versions
+			if (cln::zerop(x[i] - cln::cl_RA(1)/p) ) {
+				p = p/2 + cln::cl_RA(3)/2;
+				adjustp = true;
+				continue;
+			}
+		}
+	} while (adjustp);
+	cln::cl_RA q = p/(p-1);
+
 	for (std::size_t r = 0; r <= size; ++r) {
 		cln::cl_N buffer(1 & r ? -1 : 1);
-		cln::cl_RA p(2);
-		bool adjustp;
-		do {
-			adjustp = false;
-			for (std::size_t i = 0; i < size; ++i) {
-				if (x[i] == cln::cl_RA(1)/p) {
-					p = p/2 + cln::cl_RA(3)/2;
-					adjustp = true;
-					continue;
-				}
-			}
-		} while (adjustp);
-		cln::cl_RA q = p/(p-1);
 		std::vector<cln::cl_N> qlstx;
 		std::vector<int> qlsts;
 		for (std::size_t j = r; j >= 1; --j) {
