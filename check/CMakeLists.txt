@@ -6,6 +6,7 @@ set(ginac_exams
 	exam_parser
 	exam_numeric
 	exam_powerlaws
+	exam_collect
 	exam_inifcns
 	exam_inifcns_nstdsums
 	exam_inifcns_elliptic
