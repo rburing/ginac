@@ -134,8 +134,8 @@ public:
 	// operand access
 	size_t nops() const { return bp->nops(); }
 	ex op(size_t i) const { return bp->op(i); }
-	ex operator[](const ex & index) const { return (*bp)[index]; }
-	ex operator[](size_t i) const { return (*bp)[i]; }
+	ex operator[](const ex & index) const { return (const_cast<const basic&>(*bp))[index]; }
+	ex operator[](size_t i) const { return (const_cast<const basic&>(*bp))[i]; }
 	ex & let_op(size_t i);
 	ex & operator[](const ex & index);
 	ex & operator[](size_t i);

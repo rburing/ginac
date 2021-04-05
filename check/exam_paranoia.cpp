@@ -638,6 +638,27 @@ unsigned exam_paranoia26()
 	return result;
 }
 
+// Bug in collect()
+// cf. https://www.ginac.de/pipermail/ginac-list/2021-March/002337.html
+static unsigned exam_collect_multiply_referenced_lst()
+{
+        unsigned result = 0;
+        symbol x("x"), y("y");
+        ex a = x + y;
+        ex l = lst{x, y};
+        ex l2 = l;  // make l a multiply referenced object
+
+        try {
+                ex b = collect(a, l);
+        } catch (const std::runtime_error & e) {
+                clog << "collect(" << ", " << l << ") threw a runtime_error("
+                     << e.what() << ")" << endl;
+                ++result;
+        }
+
+        return result;
+}
+
 unsigned exam_paranoia()
 {
 	unsigned result = 0;
@@ -672,6 +693,7 @@ unsigned exam_paranoia()
 	result += exam_paranoia24();  cout << '.' << flush;
 	result += exam_paranoia25();  cout << '.' << flush;
 	result += exam_paranoia26();  cout << '.' << flush;
+	result += exam_collect_multiply_referenced_lst();  cout << '.' << flush;
 	
 	return result;
 }
