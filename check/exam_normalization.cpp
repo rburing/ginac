@@ -252,6 +252,20 @@ static unsigned exam_exponent_law()
 		result += check_normal(e, den);
 	}
 
+	// Negative exponents
+	e = (exp(2*x)-exp(-2*x))/(exp(x)-exp(-x));
+	ex en = e.normal();
+	// Either exp(x) or exp(-x) can be viewed as a "symbol" during run-time
+	// thus two different forms of the result are possible
+	ex r1 = (exp(2*x)+1)/exp(x) ;
+	ex r2 = (exp(-2*x)+1)/exp(-x);
+
+	if (!en.is_equal(r1) && !en.is_equal(r2)) {
+		clog << "normal form of " << e << " erroneously returned "
+		     << en << " (should be " << r1 << " or " << r2 << ")" << endl;
+		result += 1;
+	}
+
 	return result;
 }
 
@@ -304,6 +318,12 @@ static unsigned exam_power_law()
 		e = 4*pow(b, y)-9*pow(b, z);
 		e /= 2*pow(b, y/2)-3*pow(b, z/2);
 		d = 2*pow(b, y/2)+3*pow(b, z/2);
+		result += check_normal(e, d);
+
+		// Negative powers
+		e = (b -pow(b,-1));
+		e /= (pow(b, numeric(1,2)) - pow(b, numeric(-1,2)));
+		d = (b+1)*pow(b, numeric(-1,2));
 		result += check_normal(e, d);
 	}
 

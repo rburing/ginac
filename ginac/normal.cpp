@@ -2196,14 +2196,18 @@ ex basic::normal(exmap & repl, exmap & rev_lookup, lst & modifier) const
 
 	normal_map_function map_normal;
 	int nmod = modifier.nops(); // To watch new modifiers to the replacement list
-	lst result = dynallocate<lst>({replace_with_symbol(map(map_normal), repl, rev_lookup, modifier), _ex1});
+	ex result = replace_with_symbol(map(map_normal), repl, rev_lookup, modifier);
 	for (int imod = nmod; imod < modifier.nops(); ++imod) {
 		exmap this_repl;
 		this_repl.insert(std::make_pair(modifier.op(imod).op(0), modifier.op(imod).op(1)));
-		result = ex_to<lst>(result.subs(this_repl, subs_options::no_pattern));
+		result = result.subs(this_repl, subs_options::no_pattern);
 	}
 
-	return result;
+	// Sometimes we may obtain negative powers, they need to be placed to denominator
+	if (is_a<power>(result) && result.op(1).info(info_flags::negative))
+		return dynallocate<lst>({_ex1, power(result.op(0), -result.op(1))});
+	else
+		return dynallocate<lst>({result, _ex1});
 }
 
 
