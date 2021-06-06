@@ -5,6 +5,7 @@ EXAMS = exam_paranoia \
 	exam_match \
 	exam_parser \
 	exam_numeric \
+	exam_relational \
 	exam_powerlaws \
 	exam_collect \
 	exam_inifcns \
@@ -80,6 +81,9 @@ exam_parser_LDADD = ../ginac/libginac.la
 
 exam_numeric_SOURCES = exam_numeric.cpp
 exam_numeric_LDADD = ../ginac/libginac.la
+
+exam_relational_SOURCES = exam_relational.cpp
+exam_relational_LDADD = ../ginac/libginac.la
 
 exam_powerlaws_SOURCES = exam_powerlaws.cpp
 exam_powerlaws_LDADD = ../ginac/libginac.la

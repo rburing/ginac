@@ -5,6 +5,7 @@ set(ginac_exams
 	exam_match
 	exam_parser
 	exam_numeric
+	exam_relational
 	exam_powerlaws
 	exam_collect
 	exam_inifcns

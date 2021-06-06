@@ -8,6 +8,7 @@ exam_collect
 exam_color
 exam_differentiation
 exam_factor
+exam_function_exvector
 exam_heur_gcd
 exam_indexed
 exam_inifcns
@@ -23,6 +24,7 @@ exam_sqrfree
 exam_numeric
 exam_paranoia
 exam_polygcd
+exam_relational
 exam_collect_common_factors
 exam_powerlaws
 exam_pseries
