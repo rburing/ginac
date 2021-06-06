@@ -309,25 +309,42 @@ relational::safe_bool relational::make_safe_bool(bool cond) const
 relational::operator relational::safe_bool() const
 {
 	const ex df = lh-rh;
-	if (!is_exactly_a<numeric>(df))
-		// cannot decide on non-numerical results
-		return o==not_equal ? make_safe_bool(true) : make_safe_bool(false);
-
-	switch (o) {
-		case equal:
-			return make_safe_bool(ex_to<numeric>(df).is_zero());
-		case not_equal:
-			return make_safe_bool(!ex_to<numeric>(df).is_zero());
-		case less:
-			return make_safe_bool(ex_to<numeric>(df)<(*_num0_p));
-		case less_or_equal:
-			return make_safe_bool(ex_to<numeric>(df)<=(*_num0_p));
-		case greater:
-			return make_safe_bool(ex_to<numeric>(df)>(*_num0_p));
-		case greater_or_equal:
-			return make_safe_bool(ex_to<numeric>(df)>=(*_num0_p));
-		default:
-			throw(std::logic_error("invalid relational operator"));
+	// We treat numeric and symbolic expression differently
+	if (is_exactly_a<numeric>(df)) {
+		switch (o) {
+			case equal:
+				return make_safe_bool(ex_to<numeric>(df).is_zero());
+			case not_equal:
+				return make_safe_bool(!ex_to<numeric>(df).is_zero());
+			case less:
+				return make_safe_bool(ex_to<numeric>(df)<(*_num0_p));
+			case less_or_equal:
+				return make_safe_bool(ex_to<numeric>(df)<=(*_num0_p));
+			case greater:
+				return make_safe_bool(ex_to<numeric>(df)>(*_num0_p));
+			case greater_or_equal:
+				return make_safe_bool(ex_to<numeric>(df)>=(*_num0_p));
+			default:
+				throw(std::logic_error("invalid relational operator"));
+		}
+	} else {
+		// The conversion for symbolic expressions is based on the info flags
+		switch (o) {
+			case equal:
+				return make_safe_bool(df.is_zero());
+			case not_equal:
+				return make_safe_bool(! df.is_zero());
+			case less:
+				return make_safe_bool(df.info(info_flags::negative));
+			case less_or_equal:
+				return make_safe_bool((-df).info(info_flags::nonnegative));
+			case greater:
+				return make_safe_bool(df.info(info_flags::positive));
+			case greater_or_equal:
+				return make_safe_bool(df.info(info_flags::nonnegative));
+			default:
+				throw(std::logic_error("invalid relational operator"));
+		}
 	}
 }
 
