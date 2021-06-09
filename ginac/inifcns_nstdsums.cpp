@@ -3318,7 +3318,9 @@ static ex H_evalf(const ex& x1, const ex& x2)
 			// x -> 1-x
 			if (has_minus_one) {
 				map_trafo_H_convert_to_Li filter;
-				return filter(H(m, numeric(x)).hold()).evalf();
+                                // 09.06.2021: bug fix: don't forget a possible minus sign from the case realpart(x) < 0
+				res *= filter(H(m, numeric(x)).hold()).evalf();
+				return res;
 			}
 			map_trafo_H_1mx trafo;
 			res *= trafo(H(m, xtemp).hold());
