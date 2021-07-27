@@ -2012,12 +2012,12 @@ bool modular_form_kernel::is_numeric(void) const
 	symbol qbar("qbar");
 
 	// test with a random number and random expansion
-	return series_to_poly(P.series(qbar,18)).subs(qbar==numeric(1,937)).evalf().info(info_flags::numeric);
+	return series_to_poly(q_expansion_modular_form(qbar,18)).subs(qbar==numeric(1,937)).evalf().info(info_flags::numeric);
 }
 
 ex modular_form_kernel::Laurent_series(const ex & qbar, int order) const
 {
-	ex res = series_to_poly(P.series(qbar,order+1));
+	ex res = series_to_poly(q_expansion_modular_form(qbar,order+1));
 	res = C_norm * res/qbar;
 	res = res.series(qbar,order);
 	return res;
