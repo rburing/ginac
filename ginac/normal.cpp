@@ -2072,7 +2072,7 @@ static ex replace_with_symbol(const ex & e, exmap & repl, exmap & rev_lookup, ls
 	// they can be rationalised more efficiently
 	if (is_a<function>(e_replaced) && is_ex_the_function(e_replaced, exp)) {
 		for (auto & it : repl) {
-			if (is_a<function>(it.second) && is_ex_the_function(e_replaced, exp)) {
+			if (is_a<function>(it.second) && is_ex_the_function(it.second, exp)) {
 				ex ratio = normal(e_replaced.op(0) / it.second.op(0));
 				if (is_a<numeric>(ratio) && ex_to<numeric>(ratio).is_rational()) {
 					// Different exponents can be treated as powers of the same basic equation
