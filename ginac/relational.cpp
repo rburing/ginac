@@ -348,4 +348,11 @@ relational::operator relational::safe_bool() const
 	}
 }
 
+/** Returns an equivalent relational with zero right-hand side.
+ */
+ex relational::canonical() const
+{
+	return relational(lh-rh, _ex0, o);
+}
+
 } // namespace GiNaC

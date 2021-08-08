@@ -1866,12 +1866,30 @@ substitutions.  They are also used as arguments to the @code{ex::series}
 method, where the left hand side of the relation specifies the variable
 to expand in and the right hand side the expansion point.  They can also
 be used for creating systems of equations that are to be solved for
-unknown variables.  But the most common usage of objects of this class
+unknown variables.
+
+But the most common usage of objects of this class
 is rather inconspicuous in statements of the form @code{if
 (expand(pow(a+b,2))==a*a+2*a*b+b*b) @{...@}}.  Here, an implicit
 conversion from @code{relational} to @code{bool} takes place.  Note,
 however, that @code{==} here does not perform any simplifications, hence
 @code{expand()} must be called explicitly.
+
+Simplifications of
+relationals may be more efficient if preceded by a call to
+@example
+ex relational::canonical() const
+@end example
+which returns an equivalent relation with the zero
+right-hand side. For example:
+@example
+possymbol p("p");
+relational rel = (p >= (p*p-1)/p);
+if (ex_to<relational>(rel.canonical().normal()))
+	cout << "correct inequality" << endl;
+@end example
+However, a user shall not expect that any inequality can be fully
+resolved by GiNaC.
 
 @node Integrals, Matrices, Relations, Basic concepts
 @c    node-name, next, previous, up

@@ -63,6 +63,8 @@ public:
 	void archive(archive_node& n) const override;
 	/** Read (a.k.a. deserialize) object from archive. */
 	void read_archive(const archive_node& n, lst& syms) override;
+	ex canonical() const;
+
 protected:
 	ex eval_ncmul(const exvector & v) const override;
 	bool match_same_type(const basic & other) const override;
