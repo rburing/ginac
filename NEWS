@@ -1,5 +1,14 @@
 This file records noteworthy changes.
 
+1.8.1 (9 August 2021)
+* Add method relational::canonical() and improve conversion of relational to
+  Boolean (it now works on many simple symbolic cases).
+* Improve normalization of negative exponents.
+* Fix indexing multiply referenced objects with ex::operator[].
+* Make functions evalf() their arguments before doing own evalf().
+* Fix bugs in H_evalf() and in evaluation of iterated integrals.
+* Several portability improvements and compiler warning fixes.
+
 1.8.0 (14 October 2020)
 * New routines for the numerical evaluation of iterated integrals like
   elliptic multiple polylogarithms or iterated integrals of modular forms.

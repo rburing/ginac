@@ -30,7 +30,7 @@
 #define GINACLIB_MINOR_VERSION 8
 
 /* Micro version of GiNaC */
-#define GINACLIB_MICRO_VERSION 0
+#define GINACLIB_MICRO_VERSION 1
 
 // GiNaC library version information. It has very little to do with GiNaC
 // version number. In particular, library version is OS dependent. 
@@ -49,12 +49,15 @@
 // increasing. This doesn't matter, though: there is not incurred cost
 // for numbers that are omitted, except for shrinking the available space
 // of leftover numbers. Not something we need to worry about yet. ;-)
-// TODO, when setting GINAC_LT_REVISION to 0:
+//
+// On Linux, the SONAME is libginac.so.$(GINAC_LT_CURRENT)-$(GINAC_LT_AGE).
+//
+// TODO, when breaking the SONAME:
 //  * change matrix inverse to use default argument (twice)
-//  * remove interfaces marked as deprecated
-#define GINAC_LT_CURRENT  11
+//  * check for interfaces marked as deprecated
+#define GINAC_LT_CURRENT  12
 #define GINAC_LT_REVISION 0
-#define GINAC_LT_AGE      0
+#define GINAC_LT_AGE      1
 
 /*
  * GiNaC archive file version information.

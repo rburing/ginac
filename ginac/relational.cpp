@@ -308,7 +308,7 @@ relational::safe_bool relational::make_safe_bool(bool cond) const
  *  unequal or undecidable). */
 relational::operator relational::safe_bool() const
 {
-	const ex df = lh-rh;
+	const ex df = lh-rh;  // like ::canonical() method
 	// We treat numeric and symbolic expression differently
 	if (is_exactly_a<numeric>(df)) {
 		switch (o) {
