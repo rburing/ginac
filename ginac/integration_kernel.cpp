@@ -1963,6 +1963,8 @@ ex modular_form_kernel::series(const relational & r, int order, unsigned options
 	subs_q_expansion do_subs_q_expansion(qbar, order);
 
 	ex res = do_subs_q_expansion(P).series(qbar,order);
+	res += Order(pow(qbar,order));
+	res = res.series(qbar,order);
 
 	return res;
 }
