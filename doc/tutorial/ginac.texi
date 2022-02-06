@@ -5700,7 +5700,7 @@ using namespace GiNaC;
 ex machin_pi(int degr)
 @{
     symbol x;
-    ex pi_expansion = series_to_poly(atan(x).series(x,degr));
+    ex pi_expansion = series_to_poly(atan(x).series(x==0,degr));
     ex pi_approx = 16*pi_expansion.subs(x==numeric(1,5))
                    -4*pi_expansion.subs(x==numeric(1,239));
     return pi_approx;
