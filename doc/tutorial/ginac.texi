@@ -1194,7 +1194,7 @@ For storing numerical things, GiNaC uses Bruno Haible's library CLN.
 The classes therein serve as foundation classes for GiNaC.  CLN stands
 for Class Library for Numbers or alternatively for Common Lisp Numbers.
 In order to find out more about CLN's internals, the reader is referred to
-the documentation of that library.  @inforef{Introduction, , cln}, for
+the documentation of that library.  @xref{Top,,, cln, The CLN Manual}, for
 more information. Suffice to say that it is by itself build on top of
 another library, the GNU Multiple Precision library GMP, which is an
 extremely fast library for arbitrary long integers and rationals as well
