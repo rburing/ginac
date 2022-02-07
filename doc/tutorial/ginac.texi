@@ -8782,12 +8782,12 @@ program use @footnote{If GiNaC is installed into some non-standard
 directory @var{prefix} one should set the @var{PKG_CONFIG_PATH}
 environment variable to @var{prefix}/lib/pkgconfig for this to work.}
 @example
-g++ -o simple `pkg-config --cflags --libs ginac` simple.cpp
+g++ -o simple simple.cpp `pkg-config --cflags --libs ginac`
 @end example
 
 This command line might expand to (for example):
 @example
-g++ -o simple -lginac -lcln simple.cpp
+g++ -o simple simple.cpp -lginac -lcln
 @end example
 
 Not only is the form using @command{pkg-config} easier to type, it will
