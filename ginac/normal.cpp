@@ -1957,7 +1957,6 @@ ex sqrfree_parfrac(const ex & a, const symbol & x)
 
 	// Factorize denominator and compute cofactors
 	epvector yun = sqrfree_yun(denom, x);
-	size_t yun_max_exponent = yun.empty() ? 0 : ex_to<numeric>(yun.back().coeff).to_int();
 	exvector factor, cofac;
 	for (size_t i=0; i<yun.size(); i++) {
 		numeric i_exponent = ex_to<numeric>(yun[i].coeff);
@@ -2195,9 +2194,9 @@ ex basic::normal(exmap & repl, exmap & rev_lookup, lst & modifier) const
 		return dynallocate<lst>({replace_with_symbol(*this, repl, rev_lookup, modifier), _ex1});
 
 	normal_map_function map_normal;
-	int nmod = modifier.nops(); // To watch new modifiers to the replacement list
+	size_t nmod = modifier.nops(); // To watch new modifiers to the replacement list
 	ex result = replace_with_symbol(map(map_normal), repl, rev_lookup, modifier);
-	for (int imod = nmod; imod < modifier.nops(); ++imod) {
+	for (size_t imod = nmod; imod < modifier.nops(); ++imod) {
 		exmap this_repl;
 		this_repl.insert(std::make_pair(modifier.op(imod).op(0), modifier.op(imod).op(1)));
 		result = result.subs(this_repl, subs_options::no_pattern);
@@ -2313,7 +2312,7 @@ ex add::normal(exmap & repl, exmap & rev_lookup, lst & modifier) const
 	exvector nums, dens;
 	nums.reserve(seq.size()+1);
 	dens.reserve(seq.size()+1);
-	int nmod = modifier.nops(); // To watch new modifiers to the replacement list
+	size_t nmod = modifier.nops(); // To watch new modifiers to the replacement list
 	for (auto & it : seq) {
 		ex n = ex_to<basic>(recombine_pair_to_ex(it)).normal(repl, rev_lookup, modifier);
 		nums.push_back(n.op(0));
@@ -2332,7 +2331,7 @@ ex add::normal(exmap & repl, exmap & rev_lookup, lst & modifier) const
 	auto num_it = nums.begin(), num_itend = nums.end();
 	auto den_it = dens.begin(), den_itend = dens.end();
 //std::clog << " num = " << *num_it << ", den = " << *den_it << std::endl;
-	for (int imod = nmod; imod < modifier.nops(); ++imod) {
+	for (size_t imod = nmod; imod < modifier.nops(); ++imod) {
 		while (num_it != num_itend) {
 			*num_it = num_it->subs(modifier.op(imod), subs_options::no_pattern);
 			++num_it;
@@ -2378,7 +2377,7 @@ ex mul::normal(exmap & repl, exmap & rev_lookup, lst & modifier) const
 	exvector num; num.reserve(seq.size());
 	exvector den; den.reserve(seq.size());
 	ex n;
-	int nmod = modifier.nops(); // To watch new modifiers to the replacement list
+	size_t nmod = modifier.nops(); // To watch new modifiers to the replacement list
 	for (auto & it : seq) {
 		n = ex_to<basic>(recombine_pair_to_ex(it)).normal(repl, rev_lookup, modifier);
 		num.push_back(n.op(0));
@@ -2388,8 +2387,8 @@ ex mul::normal(exmap & repl, exmap & rev_lookup, lst & modifier) const
 	num.push_back(n.op(0));
 	den.push_back(n.op(1));
 	auto num_it = num.begin(), num_itend = num.end();
-	auto den_it = den.begin(), den_itend = den.end();
-	for (int imod = nmod; imod < modifier.nops(); ++imod) {
+	auto den_it = den.begin();
+	for (size_t imod = nmod; imod < modifier.nops(); ++imod) {
 		while (num_it != num_itend) {
 			*num_it = num_it->subs(modifier.op(imod), subs_options::no_pattern);
 			++num_it;
@@ -2412,14 +2411,14 @@ ex mul::normal(exmap & repl, exmap & rev_lookup, lst & modifier) const
 ex power::normal(exmap & repl, exmap & rev_lookup, lst & modifier) const
 {
 	// Normalize basis and exponent (exponent gets reassembled)
-	int nmod = modifier.nops(); // To watch new modifiers to the replacement list
+	size_t nmod = modifier.nops(); // To watch new modifiers to the replacement list
 	ex n_basis = ex_to<basic>(basis).normal(repl, rev_lookup, modifier);
-	for (int imod = nmod; imod < modifier.nops(); ++imod)
+	for (size_t imod = nmod; imod < modifier.nops(); ++imod)
 		n_basis = n_basis.subs(modifier.op(imod), subs_options::no_pattern);
 
 	nmod = modifier.nops();
 	ex n_exponent = ex_to<basic>(exponent).normal(repl, rev_lookup, modifier);
-	for (int imod = nmod; imod < modifier.nops(); ++imod)
+	for (size_t imod = nmod; imod < modifier.nops(); ++imod)
 		n_exponent = n_exponent.subs(modifier.op(imod), subs_options::no_pattern);
 	n_exponent = n_exponent.op(0) / n_exponent.op(1);
 
@@ -2500,7 +2499,7 @@ ex ex::normal() const
 
 	// Re-insert replaced symbols
 	if (!repl.empty()) {
-		for(int i=0; i < modifier.nops(); ++i)
+		for(size_t i=0; i < modifier.nops(); ++i)
 			e = e.subs(modifier.op(i), subs_options::no_pattern);
 		e = e.subs(repl, subs_options::no_pattern);
 	}
@@ -2527,7 +2526,7 @@ ex ex::numer() const
 	if (repl.empty())
 		return e.op(0);
 	else {
-		for(int i=0; i < modifier.nops(); ++i)
+		for(size_t i=0; i < modifier.nops(); ++i)
 			e = e.subs(modifier.op(i), subs_options::no_pattern);
 
 		return e.op(0).subs(repl, subs_options::no_pattern);
@@ -2552,7 +2551,7 @@ ex ex::denom() const
 	if (repl.empty())
 		return e.op(1);
 	else {
-		for(int i=0; i < modifier.nops(); ++i)
+		for(size_t i=0; i < modifier.nops(); ++i)
 			e = e.subs(modifier.op(i), subs_options::no_pattern);
 
 		return e.op(1).subs(repl, subs_options::no_pattern);
@@ -2577,7 +2576,7 @@ ex ex::numer_denom() const
 	if (repl.empty())
 		return e;
 	else {
-		for(int i=0; i < modifier.nops(); ++i)
+		for(size_t i=0; i < modifier.nops(); ++i)
 			e = e.subs(modifier.op(i), subs_options::no_pattern);
 
 		return e.subs(repl, subs_options::no_pattern);
