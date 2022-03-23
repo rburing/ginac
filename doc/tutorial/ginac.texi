@@ -135,7 +135,7 @@ the near future.
 
 @section License
 The GiNaC framework for symbolic computation within the C++ programming
-language is Copyright @copyright{} 1999-2021 Johannes Gutenberg
+language is Copyright @copyright{} 1999-2022 Johannes Gutenberg
 University Mainz, Germany.
 
 This program is free software; you can redistribute it and/or
