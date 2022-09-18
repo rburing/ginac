@@ -377,6 +377,9 @@ detail here. Please refer to the GiNaC documentation.
 .BI sqrfree( "expression [" ", " symbol-list] )
 \- square-free factorization of a polynomial
 .br
+.BI sqrfree_parfrac( expression ", " symbol )
+\- square-free partial fraction decomposition of rational function
+.br
 .BI sqrt( expression )
 \- square root
 .br

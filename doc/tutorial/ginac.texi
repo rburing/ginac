@@ -5379,6 +5379,27 @@ some care with subsequent processing of the result:
 Note also, how factors with the same exponents are not fully factorized
 with this method.
 
+@subsection Square-free partial fraction decomposition
+@cindex square-free partial fraction decomposition
+@cindex partial fraction decomposition
+@cindex @code{sqrfree_parfrac()}
+
+GiNaC also supports square-free partial fraction decomposition of
+rational functions:
+@example
+ex sqrfree_parfrac(const ex & a, const symbol & x);
+@end example
+It is called square-free because it assumes a square-free
+factorization of the input's denominator:
+@example
+    ...
+    symbol x("x");
+
+    ex rat = (x-4)/(pow(x,2)*(x+2));
+    cout << sqrfree_parfrac(rat, x) << endl;
+     // -> -2*x^(-2)+3/2*x^(-1)-3/2*(2+x)^(-1)
+@end example
+
 @subsection Polynomial factorization
 @cindex factorization
 @cindex polynomial factorization

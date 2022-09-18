@@ -1958,10 +1958,12 @@ ex sqrfree_parfrac(const ex & a, const symbol & x)
 	// Factorize denominator and compute cofactors
 	epvector yun = sqrfree_yun(denom, x);
 	exvector factor, cofac;
+	int dim = 0;
 	for (size_t i=0; i<yun.size(); i++) {
 		numeric i_exponent = ex_to<numeric>(yun[i].coeff);
 		for (size_t j=0; j<i_exponent; j++) {
 			factor.push_back(pow(yun[i].rest, j+1));
+			dim += degree(yun[i].rest, x);
 			ex prod = _ex1;
 			for (size_t k=0; k<yun.size(); k++) {
 				if (yun[k].coeff == i_exponent)
@@ -1972,34 +1974,58 @@ ex sqrfree_parfrac(const ex & a, const symbol & x)
 			cofac.push_back(prod.expand());
 		}
 	}
-	size_t num_factors = factor.size();
 //std::clog << "factors  : " << exprseq(factor) << std::endl;
 //std::clog << "cofactors: " << exprseq(cofac) << std::endl;
 
-	// Construct coefficient matrix for decomposition
-	int max_denom_deg = denom.degree(x);
-	matrix sys(max_denom_deg + 1, num_factors);
-	matrix rhs(max_denom_deg + 1, 1);
-	for (int i=0; i<=max_denom_deg; i++) {
-		for (size_t j=0; j<num_factors; j++)
-			sys(i, j) = cofac[j].coeff(x, i);
-		rhs(i, 0) = red_numer.coeff(x, i);
+	// Construct linear system for decomposition
+	matrix sys(dim, dim);
+	matrix rhs(dim, 1);
+	matrix vars(dim, 1);
+	for (size_t i=0, n=0, f=0; i<yun.size(); i++) {
+		int i_expo = to_int(ex_to<numeric>(yun[i].coeff));
+		for (size_t j=0; j<i_expo; j++) {
+			for (size_t k=0; k<degree(yun[i].rest, x); k++) {
+				GINAC_ASSERT(n < dim  &&  f < factor.size());
+
+				// column n of coefficient matrix
+				for (size_t r=0; r+k<dim; r++) {
+					sys(r+k, n) = cofac[f].coeff(x, r);
+				}
+
+				// element n of right hand side vector
+				rhs(n, 0) = red_numer.coeff(x, n);
+
+				// element n of free variables vector
+				vars(n, 0) = symbol();
+
+				n++;
+			}
+			f++;
+		}
 	}
 //std::clog << "coeffs: " << sys << std::endl;
 //std::clog << "rhs   : " << rhs << std::endl;
 
-	// Solve resulting linear system
-	matrix vars(num_factors, 1);
-	for (size_t i=0; i<num_factors; i++)
-		vars(i, 0) = symbol();
+	// Solve resulting linear system and sum up decomposed fractions
 	matrix sol = sys.solve(vars, rhs);
+//std::clog << "sol   : " << sol << std::endl;
+	ex sum = red_poly;
+	for (size_t i=0, n=0, f=0; i<yun.size(); i++) {
+		int i_expo = to_int(ex_to<numeric>(yun[i].coeff));
+		for (size_t j=0; j<i_expo; j++) {
+			ex frac_numer = 0;
+			for (size_t k=0; k<degree(yun[i].rest, x); k++) {
+				GINAC_ASSERT(n < dim  &&  f < factor.size());
+				frac_numer += sol(n, 0) * pow(x, k);
+				n++;
+			}
+			sum += frac_numer / factor[f];
 
-	// Sum up decomposed fractions
-	ex sum = 0;
-	for (size_t i=0; i<num_factors; i++)
-		sum += sol(i, 0) / factor[i];
+			f++;
+		}
+	}
 
-	return red_poly + sum;
+	return sum;
 }
 
 

@@ -547,6 +547,11 @@ static ex f_sqrfree2(const exprseq &e)
 	return sqrfree(e[0], ex_to<lst>(e[1]));
 }
 
+static ex f_sqrfree_parfrac(const exprseq &e)
+{
+	return sqrfree_parfrac(e[0], ex_to<symbol>(e[1]));
+}
+
 static ex f_subs3(const exprseq &e)
 {
 	CHECK_ARG(1, lst, subs);
@@ -747,6 +752,7 @@ static const fcn_init builtin_fcns[] = {
 	{"sprem", f_sprem, 3},
 	{"sqrfree", f_sqrfree1, 1},
 	{"sqrfree", f_sqrfree2, 2},
+	{"sqrfree_parfrac", f_sqrfree_parfrac, 2},
 	{"sqrt", f_sqrt, 1},
 	{"subs", f_subs2, 2},
 	{"subs", f_subs3, 3},
