@@ -1958,7 +1958,7 @@ ex sqrfree_parfrac(const ex & a, const symbol & x)
 	// Factorize denominator and compute cofactors
 	epvector yun = sqrfree_yun(denom, x);
 	exvector factor, cofac;
-	int dim = 0;
+	size_t dim = 0;
 	for (size_t i=0; i<yun.size(); i++) {
 		numeric i_exponent = ex_to<numeric>(yun[i].coeff);
 		for (size_t j=0; j<i_exponent; j++) {
@@ -1982,9 +1982,9 @@ ex sqrfree_parfrac(const ex & a, const symbol & x)
 	matrix rhs(dim, 1);
 	matrix vars(dim, 1);
 	for (size_t i=0, n=0, f=0; i<yun.size(); i++) {
-		int i_expo = to_int(ex_to<numeric>(yun[i].coeff));
+		size_t i_expo = to_int(ex_to<numeric>(yun[i].coeff));
 		for (size_t j=0; j<i_expo; j++) {
-			for (size_t k=0; k<degree(yun[i].rest, x); k++) {
+			for (size_t k=0; k<size_t(degree(yun[i].rest, x)); k++) {
 				GINAC_ASSERT(n < dim  &&  f < factor.size());
 
 				// column n of coefficient matrix
@@ -2011,10 +2011,10 @@ ex sqrfree_parfrac(const ex & a, const symbol & x)
 //std::clog << "sol   : " << sol << std::endl;
 	ex sum = red_poly;
 	for (size_t i=0, n=0, f=0; i<yun.size(); i++) {
-		int i_expo = to_int(ex_to<numeric>(yun[i].coeff));
+		size_t i_expo = to_int(ex_to<numeric>(yun[i].coeff));
 		for (size_t j=0; j<i_expo; j++) {
 			ex frac_numer = 0;
-			for (size_t k=0; k<degree(yun[i].rest, x); k++) {
+			for (size_t k=0; k<size_t(degree(yun[i].rest, x)); k++) {
 				GINAC_ASSERT(n < dim  &&  f < factor.size());
 				frac_numer += sol(n, 0) * pow(x, k);
 				n++;
