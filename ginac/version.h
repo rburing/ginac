@@ -55,7 +55,7 @@
 // TODO, when breaking the SONAME:
 //  * change matrix inverse to use default argument (twice)
 //  * check for interfaces marked as deprecated
-#define GINAC_LT_CURRENT  13
+#define GINAC_LT_CURRENT  12
 #define GINAC_LT_REVISION 3
 #define GINAC_LT_AGE      1
 
