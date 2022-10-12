@@ -1206,7 +1206,7 @@ static inline cl_I calc_bound(const ex& a, const ex& x, int maxdeg)
 		coeff = coeff + square(aa);
 	}
 	cl_I coeffnorm = ceiling1(the<cl_R>(cln::sqrt(coeff)));
-	cl_I B = coeffnorm * expt_pos(cl_I(2), cl_I(maxdeg));
+	cl_I B = coeffnorm * ash(cl_I(1), maxdeg);  // coeffnorm * 2^maxdeg
 	return ( B > maxcoeff ) ? B : maxcoeff;
 }
 
@@ -1223,7 +1223,7 @@ static inline cl_I calc_bound(const upoly& a, int maxdeg)
 		coeff = coeff + square(aa);
 	}
 	cl_I coeffnorm = ceiling1(the<cl_R>(cln::sqrt(coeff)));
-	cl_I B = coeffnorm * expt_pos(cl_I(2), cl_I(maxdeg));
+	cl_I B = coeffnorm * ash(cl_I(1), maxdeg);  // coeffnorm * 2^maxdeg
 	return ( B > maxcoeff ) ? B : maxcoeff;
 }
 
@@ -2409,7 +2409,7 @@ static ex factor_multivariate(const ex& poly, const exset& syms)
 		}
 		
 		// set up modular factors (mod p^l)
-		cl_modint_ring R = find_modint_ring(expt_pos(cl_I(prime),l));
+		cl_modint_ring R = find_modint_ring(pl);
 		upvec modfactors(ufaclst.nops()-1);
 		for ( size_t i=1; i<ufaclst.nops(); ++i ) {
 			umodpoly_from_ex(modfactors[i-1], ufaclst.op(i), x, R);
