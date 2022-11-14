@@ -65,6 +65,7 @@
 #include "normal.h"
 #include "add.h"
 
+#include <type_traits>
 #include <algorithm>
 #include <limits>
 #include <list>
@@ -218,13 +219,6 @@ static void expt_pos(umodpoly& a, unsigned int q)
 		a[i] = zero;
 	}
 }
-
-template<bool COND, typename T = void> struct enable_if
-{
-	typedef T type;
-};
-
-template<typename T> struct enable_if<false, T> { /* empty */ };
 
 template<typename T> struct uvar_poly_p
 {
