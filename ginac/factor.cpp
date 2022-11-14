@@ -1187,38 +1187,30 @@ static upoly replace_lc(const upoly& poly, const cl_I& lc)
 	return r;
 }
 
-/** Calculates the bound for the modulus.
- *  See [Mig].
+/** Calculates bound for the product of absolute values (modulus) of the roots.
+ *  Uses Landau's inequality, see [Mig].
  */
-static inline cl_I calc_bound(const ex& a, const ex& x, int maxdeg)
+static inline cl_I calc_bound(const ex& a, const ex& x)
 {
-	cl_I maxcoeff = 0;
-	cl_R coeff = 0;
+	cl_R radicand = 0;
 	for ( int i=a.degree(x); i>=a.ldegree(x); --i ) {
 		cl_I aa = abs(the<cl_I>(ex_to<numeric>(a.coeff(x, i)).to_cl_N()));
-		if ( aa > maxcoeff ) maxcoeff = aa;
-		coeff = coeff + square(aa);
+		radicand = radicand + square(aa);
 	}
-	cl_I coeffnorm = ceiling1(the<cl_R>(cln::sqrt(coeff)));
-	cl_I B = coeffnorm * ash(cl_I(1), maxdeg);  // coeffnorm * 2^maxdeg
-	return ( B > maxcoeff ) ? B : maxcoeff;
+	return ceiling1(the<cl_R>(cln::sqrt(radicand)));
 }
 
-/** Calculates the bound for the modulus.
- *  See [Mig].
+/** Calculates bound for the product of absolute values (modulus) of the roots.
+ *  Uses Landau's inequality, see [Mig].
  */
-static inline cl_I calc_bound(const upoly& a, int maxdeg)
+static inline cl_I calc_bound(const upoly& a)
 {
-	cl_I maxcoeff = 0;
-	cl_R coeff = 0;
+	cl_R radicand = 0;
 	for ( int i=degree(a); i>=0; --i ) {
 		cl_I aa = abs(a[i]);
-		if ( aa > maxcoeff ) maxcoeff = aa;
-		coeff = coeff + square(aa);
+		radicand = radicand + square(aa);
 	}
-	cl_I coeffnorm = ceiling1(the<cl_R>(cln::sqrt(coeff)));
-	cl_I B = coeffnorm * ash(cl_I(1), maxdeg);  // coeffnorm * 2^maxdeg
-	return ( B > maxcoeff ) ? B : maxcoeff;
+	return ceiling1(the<cl_R>(cln::sqrt(radicand)));
 }
 
 /** Hensel lifting as used by factor_univariate().
@@ -1240,7 +1232,7 @@ static void hensel_univar(const upoly& a_, unsigned int p, const umodpoly& u1_, 
 
 	// calc bound B
 	int maxdeg = (degree(u1_) > degree(w1_)) ? degree(u1_) : degree(w1_);
-	cl_I maxmodulus = 2*calc_bound(a, maxdeg);
+	cl_I maxmodulus = calc_bound(a) * ash(cl_I(1), maxdeg+1);  // 2 * calc_bound(a) * 2^maxdeg
 
 	// step 1
 	cl_I alpha = lcoeff(a);
@@ -1343,7 +1335,7 @@ static unsigned int next_prime(unsigned int p)
 	throw logic_error("next_prime: should not reach this point!");
 }
 
-/** Manages the splitting a vector of of modular factors into two partitions.
+/** Manages the splitting of a vector of modular factors into two partitions.
  */
 class factor_partition
 {
@@ -2394,7 +2386,7 @@ static ex factor_multivariate(const ex& poly, const exset& syms)
 				maxdeg = ufaclst[i].degree(x);
 			}
 		}
-		cl_I B = 2*calc_bound(u, x, maxdeg);
+		cl_I B = calc_bound(u, x) * ash(cl_I(1), maxdeg+1);  // 2 * calc_bound(u,x) * 2^maxdeg
 		cl_I l = 1;
 		cl_I pl = prime;
 		while ( pl < B ) {
