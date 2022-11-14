@@ -80,6 +80,9 @@ using namespace cln;
 
 namespace GiNaC {
 
+// anonymous namespace to hide all utility functions
+namespace {
+
 #ifdef DEBUGFACTOR
 #define DCOUT(str) cout << #str << endl
 #define DCOUTVAR(var) cout << #var << ": " << var << endl
@@ -132,9 +135,6 @@ ostream& operator<<(ostream& o, const vector<vector<cl_MI>>& v)
 #define DCOUTVAR(var)
 #define DCOUT2(str,var)
 #endif // def DEBUGFACTOR
-
-// anonymous namespace to hide all utility functions
-namespace {
 
 ////////////////////////////////////////////////////////////////////////////////
 // modular univariate polynomial code
