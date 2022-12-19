@@ -2065,62 +2065,63 @@ static ex hensel_multivar(const ex& a, const ex& x, const vector<EvalPoint>& I,
 	}
 }
 
-/** Takes a factorized expression and puts the factors in a lst. The exponents
+/** Takes a factorized expression and puts the factors in a vector. The exponents
  *  of the factors are discarded, e.g. 7*x^2*(y+1)^4 --> {7,x,y+1}. The first
- *  element of the list is always the numeric coefficient.
+ *  element of the result is always the numeric coefficient.
  */
-static ex put_factors_into_lst(const ex& e)
+static exvector put_factors_into_vec(const ex& e)
 {
-	lst result;
+	exvector result;
 	if ( is_a<numeric>(e) ) {
-		result.append(e);
+		result.push_back(e);
 		return result;
 	}
 	if ( is_a<power>(e) ) {
-		result.append(1);
-		result.append(e.op(0));
+		result.push_back(1);
+		result.push_back(e.op(0));
 		return result;
 	}
 	if ( is_a<symbol>(e) || is_a<add>(e) ) {
 		ex icont(e.integer_content());
-		result.append(icont);
-		result.append(e/icont);
+		result.push_back(icont);
+		result.push_back(e/icont);
 		return result;
 	}
 	if ( is_a<mul>(e) ) {
 		ex nfac = 1;
+		result.push_back(nfac);
 		for ( size_t i=0; i<e.nops(); ++i ) {
 			ex op = e.op(i);
 			if ( is_a<numeric>(op) ) {
 				nfac = op;
 			}
 			if ( is_a<power>(op) ) {
-				result.append(op.op(0));
+				result.push_back(op.op(0));
 			}
 			if ( is_a<symbol>(op) || is_a<add>(op) ) {
-				result.append(op);
+				result.push_back(op);
 			}
 		}
-		result.prepend(nfac);
+		result[0] = nfac;
 		return result;
 	}
-	throw runtime_error("put_factors_into_lst: bad term.");
+	throw runtime_error("put_factors_into_vec: bad term.");
 }
 
 /** Checks a set of numbers for whether each number has a unique prime factor.
  *
- *  @param[in]  f  list of numbers to check
+ *  @param[in]  f  numbers to check
  *  @return        true: if number set is bad, false: if set is okay (has unique
  *                 prime factors)
  */
-static bool checkdivisors(const lst& f)
+static bool checkdivisors(const exvector& f)
 {
-	const int k = f.nops();
+	const int k = f.size();
 	numeric q, r;
 	vector<numeric> d(k);
-	d[0] = ex_to<numeric>(abs(f.op(0)));
+	d[0] = ex_to<numeric>(abs(f[0]));
 	for ( int i=1; i<k; ++i ) {
-		q = ex_to<numeric>(abs(f.op(i)));
+		q = ex_to<numeric>(abs(f[i]));
 		for ( int j=i-1; j>=0; --j ) {
 			r = d[j];
 			do {
@@ -2147,13 +2148,13 @@ static bool checkdivisors(const lst& f)
  *  @param[in]     vn       leading coefficient of u in x (x==first symbol in syms)
  *  @param[in]     x        first symbol that appears in u
  *  @param[in]     syms_wox remaining symbols that appear in u
- *  @param[in]     f        lst containing the factors of the leading coefficient vn
+ *  @param[in]     f        vector containing the factors of the leading coefficient vn
  *  @param[in,out] modulus  integer modulus for random number generation (i.e. |a_i| < modulus)
  *  @param[out]    u0       returns the evaluated (univariate) polynomial
  *  @param[out]    a        returns the valid evaluation points. must have initial size equal
  *                          number of symbols-1 before calling generate_set
  */
-static void generate_set(const ex& u, const ex& vn, const ex& x, const exset& syms_wox, const lst& f,
+static void generate_set(const ex& u, const ex& vn, const ex& x, const exset& syms_wox, const exvector& f,
                          numeric& modulus, ex& u0, vector<numeric>& a)
 {
 	while ( true ) {
@@ -2180,13 +2181,13 @@ static void generate_set(const ex& u, const ex& vn, const ex& x, const exset& sy
 		}
 		if ( !is_a<numeric>(vn) ) {
 			// ... and for which the evaluated factors have each an unique prime factor
-			lst fnum = f;
-			fnum.let_op(0) = fnum.op(0) * u0.content(x);
-			for ( size_t i=1; i<fnum.nops(); ++i ) {
-				if ( !is_a<numeric>(fnum.op(i)) ) {
+			exvector fnum = f;
+			fnum[0] = fnum[0] * u0.content(x);
+			for ( size_t i=1; i<fnum.size(); ++i ) {
+				if ( !is_a<numeric>(fnum[i]) ) {
 					s = syms_wox.begin();
 					for ( size_t j=0; j<a.size(); ++j, ++s ) {
-						fnum.let_op(i) = fnum.op(i).subs(*s == a[j]);
+						fnum[i] = fnum[i].subs(*s == a[j]);
 					}
 				}
 			}
@@ -2208,7 +2209,7 @@ struct factorization_ctx {
 	const ex poly, x;         // polynomial, first symbol x...
 	const exset syms_wox;     // ...remaining symbols w/o x
 	ex unit, cont, pp;        // unit * cont * pp == poly
-	ex vn, vnlst;             // leading coeff, factors of leading coeff
+	ex vn; exvector vnlst;    // leading coeff, factors of leading coeff
 	numeric modulus;          // incremented each time we try
 	/** returns factors or empty if it did not succeed */
 	ex try_next_evaluation_homomorphism()
@@ -2221,18 +2222,19 @@ struct factorization_ctx {
 		int factor_count = 0;
 		int min_factor_count = -1;
 		ex u, delta;
-		ex ufac, ufaclst;
+		ex ufac;
+		exvector ufaclst;
 
 		// try several evaluation points to reduce the number of factors
 		while ( trialcount < maxtrials ) {
 
 			// generate a set of valid evaluation points
-			generate_set(pp, vn, x, syms_wox, ex_to<lst>(vnlst), modulus, u, a);
+			generate_set(pp, vn, x, syms_wox, vnlst, modulus, u, a);
 
 			ufac = factor_univariate(u, x, prime);
-			ufaclst = put_factors_into_lst(ufac);
-			factor_count = ufaclst.nops()-1;
-			delta = ufaclst.op(0);
+			ufaclst = put_factors_into_vec(ufac);
+			factor_count = ufaclst.size()-1;
+			delta = ufaclst[0];
 
 			if ( factor_count <= 1 ) {
 				// irreducible
@@ -2257,17 +2259,17 @@ struct factorization_ctx {
 		vector<ex> C(factor_count);
 		if ( is_a<numeric>(vn) ) {
 			// easy case
-			for ( size_t i=1; i<ufaclst.nops(); ++i ) {
-				C[i-1] = ufaclst.op(i).lcoeff(x);
+			for ( size_t i=1; i<ufaclst.size(); ++i ) {
+				C[i-1] = ufaclst[i].lcoeff(x);
 			}
 		} else {
 			// difficult case.
 			// we use the property of the ftilde having a unique prime factor.
 			// details can be found in [Wan].
 			// calculate ftilde
-			vector<numeric> ftilde(vnlst.nops()-1);
+			vector<numeric> ftilde(vnlst.size()-1);
 			for ( size_t i=0; i<ftilde.size(); ++i ) {
-				ex ft = vnlst.op(i+1);
+				ex ft = vnlst[i+1];
 				auto s = syms_wox.begin();
 				for ( size_t j=0; j<a.size(); ++j ) {
 					ft = ft.subs(*s == a[j]);
@@ -2280,7 +2282,7 @@ struct factorization_ctx {
 			vector<ex> D(factor_count, 1);
 			if ( delta == 1 ) {
 				for ( int i=0; i<factor_count; ++i ) {
-					numeric prefac = ex_to<numeric>(ufaclst.op(i+1).lcoeff(x));
+					numeric prefac = ex_to<numeric>(ufaclst[i+1].lcoeff(x));
 					for ( int j=ftilde.size()-1; j>=0; --j ) {
 						int count = 0;
 						while ( irem(prefac, ftilde[j]) == 0 ) {
@@ -2289,14 +2291,14 @@ struct factorization_ctx {
 						}
 						if ( count ) {
 							used_flag[j] = true;
-							D[i] = D[i] * pow(vnlst.op(j+1), count);
+							D[i] = D[i] * pow(vnlst[j+1], count);
 						}
 					}
 					C[i] = D[i] * prefac;
 				}
 			} else {
 				for ( int i=0; i<factor_count; ++i ) {
-					numeric prefac = ex_to<numeric>(ufaclst.op(i+1).lcoeff(x));
+					numeric prefac = ex_to<numeric>(ufaclst[i+1].lcoeff(x));
 					for ( int j=ftilde.size()-1; j>=0; --j ) {
 						int count = 0;
 						while ( irem(prefac, ftilde[j]) == 0 ) {
@@ -2307,12 +2309,12 @@ struct factorization_ctx {
 							numeric g = gcd(prefac, ex_to<numeric>(ftilde[j]));
 							prefac = iquo(prefac, g);
 							delta = delta / (ftilde[j]/g);
-							ufaclst.let_op(i+1) = ufaclst.op(i+1) * (ftilde[j]/g);
+							ufaclst[i+1] = ufaclst[i+1] * (ftilde[j]/g);
 							++count;
 						}
 						if ( count ) {
 							used_flag[j] = true;
-							D[i] = D[i] * pow(vnlst.op(j+1), count);
+							D[i] = D[i] * pow(vnlst[j+1], count);
 						}
 					}
 					C[i] = D[i] * prefac;
@@ -2335,7 +2337,7 @@ struct factorization_ctx {
 		// first factor
 		if ( delta != 1 ) {
 			C[0] = C[0] * delta;
-			ufaclst.let_op(1) = ufaclst.op(1) * delta;
+			ufaclst[1] = ufaclst[1] * delta;
 		}
 
 		// set up evaluation points
@@ -2351,7 +2353,7 @@ struct factorization_ctx {
 		// calc bound p^l
 		int maxdeg = 0;
 		for ( int i=1; i<=factor_count; ++i ) {
-			if ( ufaclst.op(i).degree(x) > maxdeg ) {
+			if ( ufaclst[i].degree(x) > maxdeg ) {
 				maxdeg = ufaclst[i].degree(x);
 			}
 		}
@@ -2365,9 +2367,9 @@ struct factorization_ctx {
 
 		// set up modular factors (mod p^l)
 		cl_modint_ring R = find_modint_ring(pl);
-		upvec modfactors(ufaclst.nops()-1);
-		for ( size_t i=1; i<ufaclst.nops(); ++i ) {
-			umodpoly_from_ex(modfactors[i-1], ufaclst.op(i), x, R);
+		upvec modfactors(ufaclst.size()-1);
+		for ( size_t i=1; i<ufaclst.size(); ++i ) {
+			umodpoly_from_ex(modfactors[i-1], ufaclst[i], x, R);
 		}
 
 		// try Hensel lifting
@@ -2411,9 +2413,9 @@ static ex factor_multivariate(const ex& poly, const exset& syms)
 
 		// find factors of leading coefficient
 		ctx.vn = ctx.pp.collect(x).lcoeff(x);
-		ctx.vnlst = put_factors_into_lst(factor(ctx.vn));
+		ctx.vnlst = put_factors_into_vec(factor(ctx.vn));
 
-		ctx.modulus = (ctx.vnlst.nops() > 3) ? ctx.vnlst.nops() : 3;
+		ctx.modulus = (ctx.vnlst.size() > 3) ? ctx.vnlst.size() : 3;
 
 		ctx_in_x.push_back(ctx);
 	}
