@@ -1235,7 +1235,7 @@ static void hensel_univar(const upoly& a_, unsigned int p, const umodpoly& u1_, 
 
 	// calc bound B
 	int maxdeg = (degree(u1_) > degree(w1_)) ? degree(u1_) : degree(w1_);
-	cl_I maxmodulus = calc_bound(a) * ash(cl_I(1), maxdeg+1);  // 2 * calc_bound(a) * 2^maxdeg
+	cl_I maxmodulus = ash(calc_bound(a), maxdeg+1);  // = 2 * calc_bound(a) * 2^maxdeg
 
 	// step 1
 	cl_I alpha = lcoeff(a);
@@ -2357,7 +2357,7 @@ struct factorization_ctx {
 				maxdeg = ufaclst[i].degree(x);
 			}
 		}
-		cl_I B = calc_bound(u, x) * ash(cl_I(1), maxdeg+1);  // 2 * calc_bound(u,x) * 2^maxdeg
+		cl_I B = ash(calc_bound(u, x), maxdeg+1);  // = 2 * calc_bound(u,x) * 2^maxdeg
 		cl_I l = 1;
 		cl_I pl = prime;
 		while ( pl < B ) {
