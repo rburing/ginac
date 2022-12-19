@@ -144,7 +144,8 @@ typedef std::vector<cln::cl_MI> umodpoly;
 typedef std::vector<cln::cl_I> upoly;
 typedef vector<umodpoly> upvec;
 
-// COPY FROM UPOLY.HPP
+
+// COPY FROM UPOLY.H
 
 // CHANGED size_t -> int !!!
 template<typename T> static int degree(const T& p)
@@ -206,7 +207,7 @@ canonicalize(T& p, const typename T::size_type hint = std::numeric_limits<typena
 	p.erase(p.begin() + i, p.end());
 }
 
-// END COPY FROM UPOLY.HPP
+// END COPY FROM UPOLY.H
 
 static void expt_pos(umodpoly& a, unsigned int q)
 {
@@ -809,6 +810,8 @@ ostream& operator<<(ostream& o, const modular_matrix& m)
 
 /** Calculates the Q matrix for a polynomial. Used by Berlekamp's algorithm.
  *
+ *  The implementation follows algorithm 8.5 of [GCL].
+ *
  *  @param[in]  a_  modular polynomial
  *  @param[out] Q   Q matrix
  */
@@ -886,7 +889,7 @@ static void nullspace(modular_matrix& M, vector<mvec>& basis)
 
 /** Berlekamp's modular factorization.
  *  
- *  The implementation follows the algorithm in chapter 8 of [GCL].
+ *  The implementation follows algorithm 8.4 of [GCL].
  *
  *  @param[in]  a    modular polynomial
  *  @param[out] upv  vector containing modular factors. if upv was not empty the
@@ -1027,7 +1030,7 @@ static void modsqrfree(const umodpoly& a, upvec& factors, vector<int>& mult)
 
 /** Distinct degree factorization (DDF).
  *  
- *  The implementation follows the algorithm in chapter 8 of [GCL].
+ *  The implementation follows algorithm 8.8 of [GCL].
  *
  *  @param[in]  a_         modular polynomial
  *  @param[out] degrees    vector containing the degrees of the factors of the
@@ -1215,7 +1218,7 @@ static inline cl_I calc_bound(const upoly& a)
 
 /** Hensel lifting as used by factor_univariate().
  *
- *  The implementation follows the algorithm in chapter 6 of [GCL].
+ *  The implementation follows algorithm 6.1 of [GCL].
  *
  *  @param[in]  a_   primitive univariate polynomials
  *  @param[in]  p    prime number that does not divide lcoeff(a)
@@ -1648,7 +1651,7 @@ static vector<ex> multivar_diophant(const vector<ex>& a_, const ex& x, const ex&
  *  with deg(s_i) < deg(a_i)
  *  and with given b_1 = a_1 * ... * a_{i-1} * a_{i+1} * ... * a_r
  *
- *  The implementation follows the algorithm in chapter 6 of [GCL].
+ *  The implementation follows algorithm 6.3 of [GCL].
  *
  *  @param[in]  a   vector of modular univariate polynomials
  *  @param[in]  x   symbol
@@ -1703,7 +1706,7 @@ static void change_modulus(const cl_modint_ring& R, umodpoly& a)
  *
  *  Solves  s*a + t*b == 1 mod p^k  given a,b.
  *
- *  The implementation follows the algorithm in chapter 6 of [GCL].
+ *  The implementation follows algorithm 6.3 of [GCL].
  *
  *  @param[in]  a   polynomial
  *  @param[in]  b   polynomial
@@ -1762,7 +1765,7 @@ static void eea_lift(const umodpoly& a, const umodpoly& b, const ex& x, unsigned
  *    s_1*b_1 + ... + s_r*b_r == x^m mod p^k
  *  with given b_1 = a_1 * ... * a_{i-1} * a_{i+1} * ... * a_r
  *
- *  The implementation follows the algorithm in chapter 6 of [GCL].
+ *  The implementation follows algorithm 6.3 of [GCL].
  *
  *  @param a  vector with univariate polynomials mod p^k
  *  @param x  symbol
@@ -1846,7 +1849,7 @@ static ex make_modular(const ex& e, const cl_modint_ring& R)
  *    s_1*b_1 + ... + s_r*b_r == c mod <I^(d+1),p^k>
  *  with given b_1 = a_1 * ... * a_{i-1} * a_{i+1} * ... * a_r
  *
- *  The implementation follows the algorithm in chapter 6 of [GCL].
+ *  The implementation follows algorithm 6.2 of [GCL].
  *
  *  @param a_  vector of multivariate factors mod p^k
  *  @param x   symbol (equiv. x_1 in [GCL])
@@ -1956,7 +1959,7 @@ static vector<ex> multivar_diophant(const vector<ex>& a_, const ex& x, const ex&
 }
 
 /** Multivariate Hensel lifting.
- *  The implementation follows the algorithm in chapter 6 of [GCL].
+ *  The implementation follows algorithm 6.4 of [GCL].
  *  Since we don't have a data type for modular multivariate polynomials, the
  *  respective operations are done in a GiNaC::ex and the function
  *  make_modular() is then called to make the coefficient modular p^l.
@@ -2142,25 +2145,24 @@ static bool checkdivisors(const lst& f)
  *
  *  @param[in]     u        multivariate polynomial to be factored
  *  @param[in]     vn       leading coefficient of u in x (x==first symbol in syms)
- *  @param[in]     syms     set of symbols that appear in u
+ *  @param[in]     x        first symbol that appears in u
+ *  @param[in]     syms_wox remaining symbols that appear in u
  *  @param[in]     f        lst containing the factors of the leading coefficient vn
  *  @param[in,out] modulus  integer modulus for random number generation (i.e. |a_i| < modulus)
  *  @param[out]    u0       returns the evaluated (univariate) polynomial
  *  @param[out]    a        returns the valid evaluation points. must have initial size equal
  *                          number of symbols-1 before calling generate_set
  */
-static void generate_set(const ex& u, const ex& vn, const exset& syms, const lst& f,
+static void generate_set(const ex& u, const ex& vn, const ex& x, const exset& syms_wox, const lst& f,
                          numeric& modulus, ex& u0, vector<numeric>& a)
 {
-	const ex& x = *syms.begin();
 	while ( true ) {
 		++modulus;
 		// generate a set of integers ...
 		u0 = u;
 		ex vna = vn;
 		ex vnatry;
-		exset::const_iterator s = syms.begin();
-		++s;
+		auto s = syms_wox.begin();
 		for ( size_t i=0; i<a.size(); ++i ) {
 			do {
 				a[i] = mod(numeric(rand()), 2*modulus) - modulus;
@@ -2182,8 +2184,7 @@ static void generate_set(const ex& u, const ex& vn, const exset& syms, const lst
 			fnum.let_op(0) = fnum.op(0) * u0.content(x);
 			for ( size_t i=1; i<fnum.nops(); ++i ) {
 				if ( !is_a<numeric>(fnum.op(i)) ) {
-					s = syms.begin();
-					++s;
+					s = syms_wox.begin();
 					for ( size_t j=0; j<a.size(); ++j, ++s ) {
 						fnum.let_op(i) = fnum.op(i).subs(*s == a[j]);
 					}
@@ -2201,49 +2202,19 @@ static void generate_set(const ex& u, const ex& vn, const exset& syms, const lst
 // forward declaration
 static ex factor_sqrfree(const ex& poly);
 
-/** Multivariate factorization.
- *  
- *  The implementation is based on the algorithm described in [Wan].
- *  An evaluation homomorphism (a set of integers) is determined that fulfills
- *  certain criteria. The evaluated polynomial is univariate and is factorized
- *  by factor_univariate(). The main work then is to find the correct leading
- *  coefficients of the univariate factors. They have to correspond to the
- *  factors of the (multivariate) leading coefficient of the input polynomial
- *  (as defined for a specific variable x). After that the Hensel lifting can be
- *  performed.
- *
- *  @param[in] poly  expanded, square free polynomial
- *  @param[in] syms  contains the symbols in the polynomial
- *  @return          factorized polynomial
+/** Used by factor_multivariate().
  */
-static ex factor_multivariate(const ex& poly, const exset& syms)
-{
-	const ex& x = *syms.begin();
-
-	// make polynomial primitive
-	ex unit, cont, pp;
-	poly.unitcontprim(x, unit, cont, pp);
-	if ( !is_a<numeric>(cont) ) {
-		return unit * factor_sqrfree(cont) * factor_sqrfree(pp);
-	}
-
-	// factor leading coefficient
-	ex vn = pp.collect(x).lcoeff(x);
-	ex vnlst;
-	if ( is_a<numeric>(vn) ) {
-		vnlst = lst{vn};
-	}
-	else {
-		ex vnfactors = factor(vn);
-		vnlst = put_factors_into_lst(vnfactors);
-	}
-
-	const unsigned int maxtrials = 3;
-	numeric modulus = (vnlst.nops() > 3) ? vnlst.nops() : 3;
-	vector<numeric> a(syms.size()-1, 0);
-
-	// try now to factorize until we are successful
-	while ( true ) {
+struct factorization_ctx {
+	const ex poly, x;         // polynomial, first symbol x...
+	const exset syms_wox;     // ...remaining symbols w/o x
+	ex unit, cont, pp;        // unit * cont * pp == poly
+	ex vn, vnlst;             // leading coeff, factors of leading coeff
+	numeric modulus;          // incremented each time we try
+	/** returns factors or empty if it did not succeed */
+	ex try_next_evaluation_homomorphism()
+	{
+		constexpr unsigned maxtrials = 3;
+		vector<numeric> a(syms_wox.size(), 0);
 
 		unsigned int trialcount = 0;
 		unsigned int prime;
@@ -2256,7 +2227,7 @@ static ex factor_multivariate(const ex& poly, const exset& syms)
 		while ( trialcount < maxtrials ) {
 
 			// generate a set of valid evaluation points
-			generate_set(pp, vn, syms, ex_to<lst>(vnlst), modulus, u, a);
+			generate_set(pp, vn, x, syms_wox, ex_to<lst>(vnlst), modulus, u, a);
 
 			ufac = factor_univariate(u, x, prime);
 			ufaclst = put_factors_into_lst(ufac);
@@ -2265,7 +2236,7 @@ static ex factor_multivariate(const ex& poly, const exset& syms)
 
 			if ( factor_count <= 1 ) {
 				// irreducible
-				return poly;
+				return lst{pp};
 			}
 			if ( min_factor_count < 0 ) {
 				// first time here
@@ -2297,8 +2268,7 @@ static ex factor_multivariate(const ex& poly, const exset& syms)
 			vector<numeric> ftilde(vnlst.nops()-1);
 			for ( size_t i=0; i<ftilde.size(); ++i ) {
 				ex ft = vnlst.op(i+1);
-				auto s = syms.begin();
-				++s;
+				auto s = syms_wox.begin();
 				for ( size_t j=0; j<a.size(); ++j ) {
 					ft = ft.subs(*s == a[j]);
 					++s;
@@ -2357,10 +2327,10 @@ static ex factor_multivariate(const ex& poly, const exset& syms)
 				}
 			}
 			if ( some_factor_unused ) {
-				continue;
+				return lst{};  // next try
 			}
 		}
-		
+
 		// multiply the remaining content of the univariate polynomial into the
 		// first factor
 		if ( delta != 1 ) {
@@ -2371,8 +2341,7 @@ static ex factor_multivariate(const ex& poly, const exset& syms)
 		// set up evaluation points
 		EvalPoint ep;
 		vector<EvalPoint> epv;
-		auto s = syms.begin();
-		++s;
+		auto s = syms_wox.begin();
 		for ( size_t i=0; i<a.size(); ++i ) {
 			ep.x = *s++;
 			ep.evalpoint = a[i].to_int();
@@ -2393,7 +2362,7 @@ static ex factor_multivariate(const ex& poly, const exset& syms)
 			l = l + 1;
 			pl = pl * prime;
 		}
-		
+
 		// set up modular factors (mod p^l)
 		cl_modint_ring R = find_modint_ring(pl);
 		upvec modfactors(ufaclst.nops()-1);
@@ -2402,14 +2371,73 @@ static ex factor_multivariate(const ex& poly, const exset& syms)
 		}
 
 		// try Hensel lifting
-		ex res = hensel_multivar(pp, x, epv, prime, l, modfactors, C);
+		return hensel_multivar(pp, x, epv, prime, l, modfactors, C);
+	}
+};
+
+/** Multivariate factorization.
+ *
+ *  The implementation is based on the algorithm described in [Wan].
+ *  An evaluation homomorphism (a set of integers) is determined that fulfills
+ *  certain criteria. The evaluated polynomial is univariate and is factorized
+ *  by factor_univariate(). The main work then is to find the correct leading
+ *  coefficients of the univariate factors. They have to correspond to the
+ *  factors of the (multivariate) leading coefficient of the input polynomial
+ *  (as defined for a specific variable x). After that the Hensel lifting can be
+ *  performed. This is done in round-robin for each x in syms until success.
+ *
+ *  @param[in] poly  expanded, square free polynomial
+ *  @param[in] syms  contains the symbols in the polynomial
+ *  @return          factorized polynomial
+ */
+static ex factor_multivariate(const ex& poly, const exset& syms)
+{
+	// set up one factorization context for each symbol
+	vector<factorization_ctx> ctx_in_x;
+	for (auto x : syms) {
+		exset syms_wox;  // remaining syms w/o x
+		copy_if(syms.begin(), syms.end(),
+		        inserter(syms_wox, syms_wox.end()), [x](const ex& y){ return y != x; });
+
+		factorization_ctx ctx = {.poly = poly, .x = x,
+		                         .syms_wox = syms_wox};
+
+		// make polynomial primitive
+		poly.unitcontprim(x, ctx.unit, ctx.cont, ctx.pp);
+		if ( !is_a<numeric>(ctx.cont) ) {
+			// content is a polynomial in one or more of remaining syms, let's start over
+			return ctx.unit * factor_sqrfree(ctx.cont) * factor_sqrfree(ctx.pp);
+		}
+
+		// find factors of leading coefficient
+		ctx.vn = ctx.pp.collect(x).lcoeff(x);
+		ctx.vnlst = put_factors_into_lst(factor(ctx.vn));
+
+		ctx.modulus = (ctx.vnlst.nops() > 3) ? ctx.vnlst.nops() : 3;
+
+		ctx_in_x.push_back(ctx);
+	}
+
+	// try an evaluation homomorphism for each context in round-robin
+	auto ctx = ctx_in_x.begin();
+	while ( true ) {
+
+		ex res = ctx->try_next_evaluation_homomorphism();
+
 		if ( res != lst{} ) {
-			ex result = cont * unit;
+			// found the factors
+			ex result = ctx->cont * ctx->unit;
 			for ( size_t i=0; i<res.nops(); ++i ) {
-				result *= res.op(i).content(x) * res.op(i).unit(x);
-				result *= res.op(i).primpart(x);
+				ex unit, cont, pp;
+				res.op(i).unitcontprim(ctx->x, unit, cont, pp);
+				result *= unit * cont * pp;
 			}
 			return result;
+		}
+
+		// switch context for next symbol
+		if (++ctx == ctx_in_x.end()) {
+			ctx = ctx_in_x.begin();
 		}
 	}
 }
