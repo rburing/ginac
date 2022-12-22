@@ -1303,35 +1303,29 @@ static void hensel_univar(const upoly& a_, unsigned int p, const umodpoly& u1_, 
 	}
 }
 
-/** Returns a new prime number.
+/** Returns a new small prime number.
  *
- *  @param[in] p  prime number
- *  @return       next prime number after p
+ *  @param[in] n  an integer
+ *  @return       smallest prime greater than n
  */
-static unsigned int next_prime(unsigned int p)
+static unsigned int next_prime(unsigned int n)
 {
-	static vector<unsigned int> primes;
-	if (primes.empty()) {
-		primes = {3, 5, 7};
-	}
-	if ( p >= primes.back() ) {
-		unsigned int candidate = primes.back() + 2;
-		while ( true ) {
-			size_t n = primes.size()/2;
-			for ( size_t i=0; i<n; ++i ) {
-				if (candidate % primes[i])
-					continue;
-				candidate += 2;
-				i=-1;
-			}
-			primes.push_back(candidate);
-			if (candidate > p)
+	static vector<unsigned int> primes = {2, 3, 5, 7};
+	unsigned int candidate = primes.back();
+	while (primes.back() <= n) {
+		candidate += 2;
+		bool is_prime = true;
+		for (size_t i=1; primes[i]*primes[i]<=candidate; ++i) {
+			if (candidate % primes[i] == 0) {
+				is_prime = false;
 				break;
+			}
 		}
-		return candidate;
+		if (is_prime)
+			primes.push_back(candidate);
 	}
 	for (auto & it : primes) {
-		if ( it > p ) {
+		if ( it > n ) {
 			return it;
 		}
 	}
