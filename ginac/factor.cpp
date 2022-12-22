@@ -482,12 +482,12 @@ static umodpoly umodpoly_to_umodpoly(const umodpoly& a, const cl_modint_ring& R,
 	return e;
 }
 
-/** Divides all coefficients of the polynomial a by the integer x.
+/** Divides all coefficients of the polynomial a by the positive integer x.
  *  All coefficients are supposed to be divisible by x. If they are not, the
- *  the<cl_I> cast will raise an exception.
+ *  division will raise an exception.
  *
  *  @param[in,out] a  polynomial of which the coefficients will be reduced by x
- *  @param[in]     x  integer that divides the coefficients
+ *  @param[in]     x  positive integer that divides the coefficients
  */
 static void reduce_coeff(umodpoly& a, const cl_I& x)
 {
@@ -497,7 +497,7 @@ static void reduce_coeff(umodpoly& a, const cl_I& x)
 	for (auto & i : a) {
 		// cln cannot perform this division in the modular field
 		cl_I c = R->retract(i);
-		i = cl_MI(R, the<cl_I>(c / x));
+		i = cl_MI(R, exquopos(c, x));
 	}
 }
 
@@ -2279,8 +2279,9 @@ struct factorization_ctx {
 					numeric prefac = ex_to<numeric>(ufaclst[i+1].lcoeff(x));
 					for ( int j=ftilde.size()-1; j>=0; --j ) {
 						int count = 0;
-						while ( irem(prefac, ftilde[j]) == 0 ) {
-							prefac = iquo(prefac, ftilde[j]);
+						numeric q;
+						while ( irem(prefac, ftilde[j], q) == 0 ) {
+							prefac = q;
 							++count;
 						}
 						if ( count ) {
@@ -2295,8 +2296,9 @@ struct factorization_ctx {
 					numeric prefac = ex_to<numeric>(ufaclst[i+1].lcoeff(x));
 					for ( int j=ftilde.size()-1; j>=0; --j ) {
 						int count = 0;
-						while ( irem(prefac, ftilde[j]) == 0 ) {
-							prefac = iquo(prefac, ftilde[j]);
+						numeric q;
+						while ( irem(prefac, ftilde[j], q) == 0 ) {
+							prefac = q;
 							++count;
 						}
 						while ( irem(ex_to<numeric>(delta)*prefac, ftilde[j]) == 0 ) {
@@ -2335,13 +2337,10 @@ struct factorization_ctx {
 		}
 
 		// set up evaluation points
-		EvalPoint ep;
 		vector<EvalPoint> epv;
 		auto s = syms_wox.begin();
 		for ( size_t i=0; i<a.size(); ++i ) {
-			ep.x = *s++;
-			ep.evalpoint = a[i].to_int();
-			epv.push_back(ep);
+			epv.emplace_back(EvalPoint{*s++, a[i].to_int()});
 		}
 
 		// calc bound p^l
