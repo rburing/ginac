@@ -158,6 +158,11 @@ template<typename T> static typename T::value_type lcoeff(const T& p)
 	return p[p.size() - 1];
 }
 
+/** Make the polynomial unit normal (having unit normal leading coefficient).
+ *
+ *  @param[in, out] a  polynomial to make unit normal
+ *  @return            true if polynomial a was already unit normal, false otherwise
+ */
 static bool normalize_in_field(umodpoly& a)
 {
 	if (a.size() == 0)
@@ -172,54 +177,22 @@ static bool normalize_in_field(umodpoly& a)
 	return false;
 }
 
+/** Remove leading zero coefficients from polynomial.
+ *
+ *  @param[in, out] p     polynomial from which the zero leading coefficients will be removed
+ *  @param[in]      hint  assume all coefficients of order ≥ hint are zero
+ */
 template<typename T> static void
 canonicalize(T& p, const typename T::size_type hint = std::numeric_limits<typename T::size_type>::max())
 {
-	if (p.empty())
-		return;
+	std::size_t i = min(p.size(), hint);
 
-	std::size_t i = p.size() - 1;
-	// Be fast if the polynomial is already canonicalized
-	if (!zerop(p[i]))
-		return;
+	while ( i-- && zerop(p[i]) ) { }
 
-	if (hint < p.size())
-		i = hint;
-
-	bool is_zero = false;
-	do {
-		if (!zerop(p[i])) {
-			++i;
-			break;
-		}
-		if (i == 0) {
-			is_zero = true;
-			break;
-		}
-		--i;
-	} while (true);
-
-	if (is_zero) {
-		p.clear();
-		return;
-	}
-
-	p.erase(p.begin() + i, p.end());
+	p.erase(p.begin() + i + 1, p.end());
 }
 
 // END COPY FROM UPOLY.H
-
-static void expt_pos(umodpoly& a, unsigned int q)
-{
-	if ( a.empty() ) return;
-	cl_MI zero = a[0].ring()->zero(); 
-	int deg = degree(a);
-	a.resize(degree(a)*q+1, zero);
-	for ( int i=deg; i>0; --i ) {
-		a[i*q] = a[i];
-		a[i] = zero;
-	}
-}
 
 template<typename T> struct uvar_poly_p
 {
@@ -527,7 +500,7 @@ static void rem(const umodpoly& a, const umodpoly& b, umodpoly& r)
 	} while ( k-- );
 
 	fill(r.begin()+n, r.end(), a[0].ring()->zero());
-	canonicalize(r);
+	canonicalize(r, n);
 }
 
 /** Calculates quotient of a/b.
@@ -638,7 +611,6 @@ static void deriv(const umodpoly& a, umodpoly& d)
 
 static bool unequal_one(const umodpoly& a)
 {
-	if ( a.empty() ) return true;
 	return ( a.size() != 1 || a[0] != a[0].ring()->one() );
 }
 
@@ -662,6 +634,26 @@ static bool squarefree(const umodpoly& a)
 	umodpoly c;
 	gcd(a, b, c);
 	return equal_one(c);
+}
+
+/** Computes w^q mod a.
+ *  Uses theorem 2.1 from A.K.Lenstra's PhD thesis; see exercise 8.13 in [GCL].
+ *
+ *  @param[in]  w  polynomial
+ *  @param[in]  a  modulus polynomial
+ *  @param[in]  q  common modulus of w and a
+ *  @param[out] r  result
+ */
+static void expt_pos_Q(const umodpoly& w, const umodpoly& a, unsigned int q, umodpoly& r)
+{
+	if ( w.empty() ) return;
+	cl_MI zero = w[0].ring()->zero();
+	int deg = degree(w);
+	umodpoly buf(deg*q+1, zero);
+	for ( size_t i=0; i<=deg; ++i ) {
+		buf[i*q] = w[i];
+	}
+	rem(buf, a, r);
 }
 
 // END modular univariate polynomial code
@@ -962,9 +954,9 @@ static void berlekamp(const umodpoly& a, upvec& upv)
 
 /** Calculates a^(1/prime).
  *  
- *  @param[in] a      polynomial
- *  @param[in] prime  prime number -> exponent 1/prime
- *  @param[in] ap     resulting polynomial
+ *  @param[in]  a      polynomial
+ *  @param[in]  prime  prime number -> exponent 1/prime
+ *  @param[out] ap     resulting polynomial
  */
 static void expt_1_over_p(const umodpoly& a, unsigned int prime, umodpoly& ap)
 {
@@ -1047,23 +1039,17 @@ static void distinct_degree_factor(const umodpoly& a_, vector<int>& degrees, upv
 	int nhalf = degree(a)/2;
 
 	int i = 1;
-	umodpoly w(2);
-	w[0] = R->zero();
-	w[1] = R->one();
+	umodpoly w = {R->zero(), R->one()};
 	umodpoly x = w;
 
 	while ( i <= nhalf ) {
-		expt_pos(w, q);
 		umodpoly buf;
-		rem(w, a, buf);
+		expt_pos_Q(w, a, q, buf);
 		w = buf;
-		umodpoly wx = w - x;
-		gcd(a, wx, buf);
+		gcd(a, w - x, buf);
 		if ( unequal_one(buf) ) {
 			degrees.push_back(i);
 			ddfactors.push_back(buf);
-		}
-		if ( unequal_one(buf) ) {
 			umodpoly buf2;
 			div(a, buf, buf2);
 			a = buf2;
