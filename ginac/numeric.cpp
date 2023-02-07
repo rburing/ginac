@@ -2138,8 +2138,10 @@ const numeric doublefactorial(const numeric &n)
 
 /** The Binomial coefficients.  It computes the binomial coefficients.  For
  *  integer n and k and positive n this is the number of ways of choosing k
- *  objects from n distinct objects.  If n is negative, the formula
- *  binomial(n,k) == (-1)^k*binomial(k-n-1,k) is used to compute the result. */
+ *  objects from n distinct objects.  If n is a negative integer, the formula
+ *  binomial(n,k) == (-1)^k*binomial(k-n-1,k) (if k≥0)
+ *  binomial(n,k) == (-1)^(n-k)*binomial(-k-1,n-k) (otherwise)
+ *  is used to compute the result. */
 const numeric binomial(const numeric &n, const numeric &k)
 {
 	if (n.is_integer() && k.is_integer()) {
@@ -2149,7 +2151,10 @@ const numeric binomial(const numeric &n, const numeric &k)
 			else
 				return *_num0_p;
 		} else {
-			return _num_1_p->power(k)*binomial(k-n-(*_num1_p),k);
+			if (k.is_nonneg_integer())
+				return _num_1_p->power(k)*binomial(k-n-(*_num1_p), k);
+			else
+				return _num_1_p->power(n-k)*binomial(-k-(*_num1_p), n-k);
 		}
 	}
 	
