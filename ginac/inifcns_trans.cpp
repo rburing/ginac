@@ -149,7 +149,6 @@ static ex exp_power(const ex & x, const ex & a)
 static bool exp_info(const ex & x, unsigned inf)
 {
 	switch (inf) {
-	case info_flags::numeric:
 	case info_flags::expanded:
 	case info_flags::real:
 		return x.info(inf);
@@ -389,7 +388,6 @@ static ex log_conjugate(const ex & x)
 static bool log_info(const ex & x, unsigned inf)
 {
 	switch (inf) {
-	case info_flags::numeric:
 	case info_flags::expanded:
 		return x.info(inf);
 	case info_flags::real:
@@ -512,7 +510,6 @@ static ex sin_conjugate(const ex & x)
 static bool trig_info(const ex & x, unsigned inf)
 {
 	switch (inf) {
-	case info_flags::numeric:
 	case info_flags::expanded:
 	case info_flags::real:
 		return x.info(inf);
@@ -834,7 +831,6 @@ static ex asin_conjugate(const ex & x)
 static bool asin_info(const ex & x, unsigned inf)
 {
 	switch (inf) {
-	case info_flags::numeric:
 	case info_flags::expanded:
 		return x.info(inf);
 	default:
@@ -1039,7 +1035,6 @@ static ex atan_conjugate(const ex & x)
 static bool atan_info(const ex & x, unsigned inf)
 {
 	switch (inf) {
-	case info_flags::numeric:
 	case info_flags::expanded:
 	case info_flags::real:
 		return x.info(inf);
@@ -1158,7 +1153,6 @@ static ex atan2_deriv(const ex & y, const ex & x, unsigned deriv_param)
 static bool atan2_info(const ex & y, const ex & x, unsigned inf)
 {
 	switch (inf) {
-	case info_flags::numeric:
 	case info_flags::expanded:
 	case info_flags::real:
 		return y.info(inf) && x.info(inf);
