@@ -66,8 +66,7 @@ pseries::pseries() { }
  *  non-terminating series.
  *
  *  @param rel_  expansion variable and point (must hold a relational)
- *  @param ops_  vector of {coefficient, power} pairs (coefficient must not be zero)
- *  @return newly constructed pseries */
+ *  @param ops_  vector of {coefficient, power} pairs (coefficient must not be zero) */
 pseries::pseries(const ex &rel_, const epvector &ops_)
   : seq(ops_)
 {

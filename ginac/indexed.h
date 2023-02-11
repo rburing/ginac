@@ -48,23 +48,20 @@ class indexed : public exprseq
 public:
 	/** Construct indexed object with no index.
 	 *
-	 *  @param b Base expression
-	 *  @return newly constructed indexed object */
+	 *  @param b Base expression */
 	indexed(const ex & b);
 
 	/** Construct indexed object with one index. The index must be of class idx.
 	 *
 	 *  @param b Base expression
-	 *  @param i1 The index
-	 *  @return newly constructed indexed object */
+	 *  @param i1 The index */
 	indexed(const ex & b, const ex & i1);
 
 	/** Construct indexed object with two indices. The indices must be of class idx.
 	 *
 	 *  @param b Base expression
 	 *  @param i1 First index
-	 *  @param i2 Second index
-	 *  @return newly constructed indexed object */
+	 *  @param i2 Second index */
 	indexed(const ex & b, const ex & i1, const ex & i2);
 
 	/** Construct indexed object with three indices. The indices must be of class idx.
@@ -72,8 +69,7 @@ public:
 	 *  @param b Base expression
 	 *  @param i1 First index
 	 *  @param i2 Second index
-	 *  @param i3 Third index
-	 *  @return newly constructed indexed object */
+	 *  @param i3 Third index */
 	indexed(const ex & b, const ex & i1, const ex & i2, const ex & i3);
 
 	/** Construct indexed object with four indices. The indices must be of class idx.
@@ -82,8 +78,7 @@ public:
 	 *  @param i1 First index
 	 *  @param i2 Second index
 	 *  @param i3 Third index
-	 *  @param i4 Fourth index
-	 *  @return newly constructed indexed object */
+	 *  @param i4 Fourth index */
 	indexed(const ex & b, const ex & i1, const ex & i2, const ex & i3, const ex & i4);
 
 	/** Construct indexed object with two indices and a specified symmetry. The
@@ -92,8 +87,7 @@ public:
 	 *  @param b Base expression
 	 *  @param symm Symmetry of indices
 	 *  @param i1 First index
-	 *  @param i2 Second index
-	 *  @return newly constructed indexed object */
+	 *  @param i2 Second index */
 	indexed(const ex & b, const symmetry & symm, const ex & i1, const ex & i2);
 
 	/** Construct indexed object with three indices and a specified symmetry.
@@ -103,8 +97,7 @@ public:
 	 *  @param symm Symmetry of indices
 	 *  @param i1 First index
 	 *  @param i2 Second index
-	 *  @param i3 Third index
-	 *  @return newly constructed indexed object */
+	 *  @param i3 Third index */
 	indexed(const ex & b, const symmetry & symm, const ex & i1, const ex & i2, const ex & i3);
 
 	/** Construct indexed object with four indices and a specified symmetry. The
@@ -115,16 +108,14 @@ public:
 	 *  @param i1 First index
 	 *  @param i2 Second index
 	 *  @param i3 Third index
-	 *  @param i4 Fourth index
-	 *  @return newly constructed indexed object */
+	 *  @param i4 Fourth index */
 	indexed(const ex & b, const symmetry & symm, const ex & i1, const ex & i2, const ex & i3, const ex & i4);
 
 	/** Construct indexed object with a specified vector of indices. The indices
 	 *  must be of class idx.
 	 *
 	 *  @param b Base expression
-	 *  @param iv Vector of indices
-	 *  @return newly constructed indexed object */
+	 *  @param iv Vector of indices */
 	indexed(const ex & b, const exvector & iv);
 
 	/** Construct indexed object with a specified vector of indices and
@@ -132,8 +123,7 @@ public:
 	 *
 	 *  @param b Base expression
 	 *  @param symm Symmetry of indices
-	 *  @param iv Vector of indices
-	 *  @return newly constructed indexed object */
+	 *  @param iv Vector of indices */
 	indexed(const ex & b, const symmetry & symm, const exvector & iv);
 
 	// internal constructors

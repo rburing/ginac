@@ -1428,6 +1428,7 @@ static ex gcd_pf_mul(const ex& a, const ex& b, ex* ca, ex* cb);
  *  @param cb pointer to expression that will receive the cofactor of b, or nullptr
  *  @param check_args  check whether a and b are polynomials with rational
  *         coefficients (defaults to "true")
+ *  @param options  see GiNaC::gcd_options
  *  @return the GCD as a new expression */
 ex gcd(const ex &a, const ex &b, ex *ca, ex *cb, bool check_args, unsigned options)
 {

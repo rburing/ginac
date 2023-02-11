@@ -36,7 +36,7 @@ class ex;
  *  functions or polynomials inside function arguments.
  *
  *  @param[in] poly    expression to factorize
- *  @param[in] option  options to influence the factorization
+ *  @param[in] options see GiNaC::factor_options
  *  @return            factorized expression
  */
 extern ex factor(const ex& poly, unsigned options = 0);

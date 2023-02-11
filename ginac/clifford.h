@@ -306,7 +306,7 @@ ex remove_dirac_ONE(const ex & e, unsigned char rl = 0, unsigned options = 0);
  *  if e contains at least one, otherwise returns -1 
  *
  *  @param e Expression to be processed
- *  @ignore_ONE defines if clifford_ONE should be ignored in the search*/
+ *  @param ignore_ONE defines if clifford_ONE should be ignored in the search */
 int clifford_max_label(const ex & e, bool ignore_ONE = false);
 
 /** Calculation of the norm in the Clifford algebra. */
@@ -321,9 +321,14 @@ ex clifford_inverse(const ex & e);
  *  @param mu Index (must be of class varidx or a derived class)
  *  @param metr Metric (should be indexed, tensmetric or a derived class, or a matrix)
  *  @param rl Representation label
- *  @param e Clifford unit object
  *  @return Clifford vector with given components */
 ex lst_to_clifford(const ex & v, const ex & mu,  const ex & metr, unsigned char rl = 0);
+
+/** List or vector conversion into the Clifford vector.
+ *
+ *  @param v List or vector of coordinates
+ *  @param e Clifford unit object
+ *  @return Clifford vector with given components */
 ex lst_to_clifford(const ex & v, const ex & e);
 
 /** An inverse function to lst_to_clifford(). For given Clifford vector extracts

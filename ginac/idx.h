@@ -41,8 +41,7 @@ public:
 	/** Construct index with given value and dimension.
 	 *
 	 *  @param v Value of index (numeric or symbolic)
-	 *  @param dim Dimension of index space (numeric or symbolic)
-	 *  @return newly constructed index */
+	 *  @param dim Dimension of index space (numeric or symbolic) */
 	explicit idx(const ex & v, const ex & dim);
 
 	// functions overriding virtual functions from base classes
@@ -119,8 +118,7 @@ public:
 	 *
 	 *  @param v Value of index (numeric or symbolic)
 	 *  @param dim Dimension of index space (numeric or symbolic)
-	 *  @param covariant Make covariant index (default is contravariant)
-	 *  @return newly constructed index */
+	 *  @param covariant Make covariant index (default is contravariant) */
 	varidx(const ex & v, const ex & dim, bool covariant = false);
 
 	// functions overriding virtual functions from base classes
@@ -169,8 +167,7 @@ public:
 	 *  @param v Value of index (numeric or symbolic)
 	 *  @param dim Dimension of index space (numeric or symbolic)
 	 *  @param covariant Make covariant index (default is contravariant)
-	 *  @param dotted Make covariant dotted (default is undotted)
-	 *  @return newly constructed index */
+	 *  @param dotted Make covariant dotted (default is undotted) */
 	spinidx(const ex & v, const ex & dim = 2, bool covariant = false, bool dotted = false);
 
 	// functions overriding virtual functions from base classes

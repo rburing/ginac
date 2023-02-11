@@ -65,7 +65,8 @@ void compile_ex(const ex& expr, const symbol& sym, FUNCP_1P& fp, const std::stri
  * C code equivalent in double precision. The function pointer has type FUNCP_2P.
  *
  * @param expr Expression to be compiled
- * @param sym Symbol from the expression to become the function parameter
+ * @param sym1 Symbol from the expression to become the first function parameter
+ * @param sym2 Symbol from the expression to become the second function parameter
  * @param fp Returned function pointer
  * @param filename Name of the intermediate source code and so-file. If
  * supplied, these intermediate files will not be deleted
@@ -76,8 +77,8 @@ void compile_ex(const ex& expr, const symbol& sym1, const symbol& sym2, FUNCP_2P
  * Takes an expression and produces a function pointer to the compiled and linked
  * C code equivalent in double precision. The function pointer has type FUNCP_CUBA.
  *
- * @param expr Expression to be compiled
- * @param sym Symbol from the expression to become the function parameter
+ * @param exprs List of expression to be compiled
+ * @param syms Symbols from the expression to become the function parameters
  * @param fp Returned function pointer
  * @param filename Name of the intermediate source code and so-file. If
  * supplied, these intermediate files will not be deleted
