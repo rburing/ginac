@@ -74,7 +74,7 @@ AC_PATH_PROG(PDFLATEX, pdflatex, "")
 AC_PATH_PROG(MAKEINDEX, makeindex, "")
 AC_PATH_PROG(MAKEINFO, makeinfo, "")
 AC_PATH_PROG(DVIPS, dvips, "")
-AM_CONDITIONAL(CONFIG_TEX, [test ! \( -z "$LATEX" -o -z $"PDFLATEX" -o -z "$MAKEINDEX" -o -z "$DVIPS" \)])
+AM_CONDITIONAL(CONFIG_TEX, [test ! \( -z "$LATEX" -o -z "$PDFLATEX" -o -z "$MAKEINDEX" -o -z "$DVIPS" \)])
 AC_PATH_PROG(FIG2DEV, fig2dev, "")
 AM_CONDITIONAL(CONFIG_FIG2DEV, [test ! -z "$FIG2DEV"])
 AS_IF([test -z "$FIG2DEV" -o -z "$MAKEINFO"],
