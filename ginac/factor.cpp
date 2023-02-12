@@ -2394,7 +2394,7 @@ static ex factor_multivariate(const ex& poly, const exset& syms)
 		ctx.vn = ctx.pp.collect(x).lcoeff(x);
 		ctx.vnlst = put_factors_into_vec(factor(ctx.vn));
 
-		ctx.modulus = (ctx.vnlst.size() > 3) ? ctx.vnlst.size() : 3;
+		ctx.modulus = (ctx.vnlst.size() > 3) ? ctx.vnlst.size() : numeric(3);
 
 		ctx_in_x.push_back(ctx);
 	}
