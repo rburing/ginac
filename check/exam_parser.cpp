@@ -98,6 +98,104 @@ static int check4(ostream& err_str)
 	}
 }
 
+// Check that two strings parse to equal expressions.
+static int check_eq(ostream &err_str, parser &reader, const char *expr1, const char *expr2)
+{
+	const string srep1(expr1);
+	const string srep2(expr2);
+	ex e1, e2;
+	try{ e1 = reader(srep1); } catch (const exception &e) {
+		err_str << "\"" << srep1 << "\" failed to parse: "
+			<< e.what() << endl;
+		return 1;
+	}
+	try{ e2 = reader(srep2); } catch (const exception &e) {
+		err_str << "\"" << srep2 << "\" failed to parse: "
+			<< e.what() << endl;
+		return 1;
+	}
+	if (!(e1-e2).expand().is_zero()) {
+		err_str << "\"" << srep1 << "\" was misparsed as \""
+			<< e1 << "\"" << endl;
+		return 1;
+	}
+	return 0;
+}
+
+// Tests for the interaction of the '^' operator with
+// the unary '+' and the unary '-' operators
+static int check5(ostream& err_str)
+{
+	parser reader;
+	return
+		+check_eq(err_str, reader, "3^2+1", "10")
+		+check_eq(err_str, reader, "3^+2-1", "8")
+		+check_eq(err_str, reader, "3^-2+1", "10/9")
+		+check_eq(err_str, reader, "3^-2/5", "1/45")
+		+check_eq(err_str, reader, "3^-2*5", "5/9")
+		+check_eq(err_str, reader, "3^-2-5", "-44/9")
+		+check_eq(err_str, reader, "3^(-2)+1", "10/9")
+		+check_eq(err_str, reader, "(3)^(-2)+1", "10/9")
+		+check_eq(err_str, reader, "+3^2+1", "10")
+		+check_eq(err_str, reader, "+3^+2+1", "10")
+		+check_eq(err_str, reader, "+3^-2+1", "10/9")
+		+check_eq(err_str, reader, "+3^-2/5", "1/45")
+		+check_eq(err_str, reader, "+3^-2*5", "5/9")
+		+check_eq(err_str, reader, "+3^-2-5", "-44/9")
+		+check_eq(err_str, reader, "-3^2+1", "-8")
+		+check_eq(err_str, reader, "-3^+2+1", "-8")
+		+check_eq(err_str, reader, "-3^-2+1", "8/9")
+		+check_eq(err_str, reader, "-3^-2/3", "-1/27")
+		+check_eq(err_str, reader, "1+2^3^4", "1+(2^81)")
+		+check_eq(err_str, reader, "2^3^4+1", "1+(2^81)")
+		+check_eq(err_str, reader, "2^+3^4+1", "1+(2^81)")
+		+check_eq(err_str, reader, "2^3^+4+1", "1+(2^81)");
+}
+
+// Tests for the interaction of the '*' operator with
+// the unary '+' and the unary '-' operators
+static int check6(ostream& err_str)
+{
+	parser reader;
+	return
+		+check_eq(err_str, reader, "3*+2-1", "5")
+		+check_eq(err_str, reader, "3*2+1", "7")
+		+check_eq(err_str, reader, "3*+2+1", "7")
+		+check_eq(err_str, reader, "3*-2+1", "-5")
+		+check_eq(err_str, reader, "3*-2/5", "-6/5")
+		+check_eq(err_str, reader, "3*-2*5", "-30")
+		+check_eq(err_str, reader, "3*-2-5", "-11")
+		+check_eq(err_str, reader, "3*(-2)+1", "-5")
+		+check_eq(err_str, reader, "(3)*(-2)+1", "-5")
+		+check_eq(err_str, reader, "+3*2+1", "7")
+		+check_eq(err_str, reader, "+3*+2+1", "7")
+		+check_eq(err_str, reader, "+3*-2+1", "-5")
+		+check_eq(err_str, reader, "+3*-2/5", "-6/5")
+		+check_eq(err_str, reader, "+3*-2*5", "-30")
+		+check_eq(err_str, reader, "+3*-2-5", "-11")
+		+check_eq(err_str, reader, "-3*2+1", "-5")
+		+check_eq(err_str, reader, "-3*+2+1", "-5")
+		+check_eq(err_str, reader, "-3*-2+1", "7")
+		+check_eq(err_str, reader, "-3*-2/3", "2")
+		+check_eq(err_str, reader, "1+2*3*4", "25")
+		+check_eq(err_str, reader, "2*3*4+1", "25")
+		+check_eq(err_str, reader, "2*+3*4+1", "25")
+		+check_eq(err_str, reader, "2*3*+4+1", "25");
+}
+
+// Tests for nested unary + and unary -
+static int check7(ostream& err_str)
+{
+	parser reader;
+	return
+		+check_eq(err_str, reader, "+1", "1")
+		+check_eq(err_str, reader, "++1", "1")
+		+check_eq(err_str, reader, "+-+1", "-1")
+		+check_eq(err_str, reader, "+-+-1", "1")
+		+check_eq(err_str, reader, "+-+-+1", "1")
+		+check_eq(err_str, reader, "100++--+1+10", "111");
+}
+
 int main(int argc, char** argv)
 {
 	cout << "examining old parser bugs" << flush;
@@ -107,6 +205,9 @@ int main(int argc, char** argv)
 	errors += check2(err_str);  cout << '.' << flush;
 	errors += check3(err_str);  cout << '.' << flush;
 	errors += check4(err_str);  cout << '.' << flush;
+	errors += check5(err_str);  cout << '.' << flush;
+	errors += check6(err_str);  cout << '.' << flush;
+	errors += check7(err_str);  cout << '.' << flush;
 	if (errors) {
 		cout << "Yes, unfortunately:" << endl;
 		cout << err_str.str();

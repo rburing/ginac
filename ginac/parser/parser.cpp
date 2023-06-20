@@ -27,6 +27,7 @@
 #include "mul.h"
 #include "constant.h"
 #include "function.h"
+#include "operators.h"
 
 #include <cstdint> // for uintptr_t
 #include <sstream>
@@ -144,27 +145,6 @@ ex parser::parse_lst_expr()
 	return list;
 }
 
-extern const ex _ex0;
-
-/// unary_expr: [+-] expression
-ex parser::parse_unary_expr()
-{
-	// Unlike most other parse_* method this one does NOT consume
-	// current token so parse_binop_rhs() knows what kind of operator
-	// is being parsed.
-	
-	// There are different kinds of expressions which need to be handled:
-	// -a+b 
-	// -(a) 
-	// +a
-	// +(a)
-	// Delegate the work to parse_binop_rhs(), otherwise we end up
-	// duplicating it here. 
-	ex lhs = _ex0; // silly trick
-	ex e = parse_binop_rhs(0, lhs);
-	return e;
-}
-
 /// primary: identifier_expr | number_expr | paren_expr | unary_expr 
 ex parser::parse_primary() 
 {
@@ -178,6 +158,7 @@ ex parser::parse_primary()
 		case '{': 
 			 return parse_lst_expr();
 		case '-':
+			 return -parse_unary_expr();
 		case '+':
 			 return parse_unary_expr();
 		case lexer::token_type::literal:

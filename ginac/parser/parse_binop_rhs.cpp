@@ -114,6 +114,18 @@ ex parser::parse_binop_rhs(int expr_prec, ex& lhs)
 	}
 }
 
+/// unary_expr: [+-] expression
+ex parser::parse_unary_expr()
+{
+	// Parse a binary expression with the priority of exponentiation
+	// or higher. Ignore the overall sign, because parse_primary()
+	// handles it for us.
+	get_next_tok(); // Skip [+-]
+	ex lhs = parse_primary();
+	ex e = parse_binop_rhs(get_tok_prec('^'), lhs);
+	return e;
+}
+
 extern const numeric* _num_1_p;
 
 static ex make_minus_expr(const exvector& args)
@@ -137,6 +149,16 @@ static ex make_divide_expr(const exvector& args)
 	return dynallocate<mul>(args[0], rest);
 }
 
+static ex make_power_expr(const exvector& args)
+{
+	size_t n = args.size();
+	ex p = pow(args[n - 2], args[n - 1]);
+	for (size_t i = n - 2; i > 0; i--) {
+		p = pow(args[i - 1], p);
+	}
+	return p;
+}
+
 static ex make_binop_expr(const int binop, const exvector& args)
 {
 	switch (binop) {
@@ -149,11 +171,7 @@ static ex make_binop_expr(const int binop, const exvector& args)
 		case '/':
 			return make_divide_expr(args);
 		case '^':
-			if (args.size() != 2)
-				throw std::invalid_argument(
-						std::string(__func__) 
-						+ ": power should have exactly 2 operands");
-			return pow(args[0], args[1]);
+			return make_power_expr(args);
 		default:
 			throw std::invalid_argument(
 					std::string(__func__) 
