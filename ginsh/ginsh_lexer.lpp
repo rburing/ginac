@@ -203,8 +203,16 @@ static int ginsh_input(char *buf, int max_size)
 			YY_FATAL_ERROR("input in flex scanner failed");
 		result = n;
 #endif
-	} else if (((result = fread(buf, 1, max_size, yyin)) == 0) && ferror(yyin))
-		YY_FATAL_ERROR("input in flex scanner failed");
+	} else {
+		int c = '*', n;
+		for (n = 0; n < max_size && (c = getc(yyin)) != EOF && c != '\n'; ++n)
+			buf[n] = (char)c;
+		if (c == '\n')
+			buf[n++] = (char)c;
+		if (c == EOF && ferror(yyin))
+			YY_FATAL_ERROR("input in flex scanner failed");
+		result = n;
+	}
 
 	return result;
 }
