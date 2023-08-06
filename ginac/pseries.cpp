@@ -992,8 +992,8 @@ ex pseries::power_const(const numeric &p, int deg) const
 	// which can easily be solved given the starting value c_0 = (a_0)^p.
 	// For the more general case where the leading coefficient of A(x) is not
 	// a constant, just consider A2(x) = A(x)*x^m, with some integer m and
-	// repeat the above derivation.  The leading power of C2(x) = A2(x)^2 is
-	// then of course x^(p*m) but the recurrence formula still holds.
+	// repeat the above derivation.  The leading power of C2(x) = A2(x)^p is
+	// then of course a_0^p*x^(p*m) but the recurrence formula still holds.
 	
 	if (seq.empty()) {
 		// as a special case, handle the empty (zero) series honoring the
@@ -1005,16 +1005,27 @@ ex pseries::power_const(const numeric &p, int deg) const
 		else
 			return *this;
 	}
-	
-	const int ldeg = ldegree(var);
-	if (!(p*ldeg).is_integer())
+
+	const int base_ldeg = ldegree(var);
+	if (!(p*base_ldeg).is_integer())
 		throw std::runtime_error("pseries::power_const(): trying to assemble a Puiseux series");
+	int new_ldeg = (p*base_ldeg).to_int();
+
+	const int base_deg = degree(var);
+	int new_deg = deg;
+	if (p.is_pos_integer()) {
+		// No need to compute beyond p*base_deg.
+		new_deg = std::min((p*base_deg).to_int(), deg);
+	}
 
 	// adjust number of coefficients
-	int numcoeff = deg - (p*ldeg).to_int();
+	int numcoeff = new_deg - new_ldeg;
+	if (new_deg < deg)
+		numcoeff += 1;
+
 	if (numcoeff <= 0) {
-		epvector epv { expair(Order(_ex1), deg) };
-		return dynallocate<pseries>(relational(var,point), std::move(epv));
+		return dynallocate<pseries>(relational(var, point),
+		                            epvector{{Order(_ex1), deg}});
 	}
 	
 	// O(x^n)^(-m) is undefined
@@ -1024,33 +1035,35 @@ ex pseries::power_const(const numeric &p, int deg) const
 	// Compute coefficients of the powered series
 	exvector co;
 	co.reserve(numcoeff);
-	co.push_back(pow(coeff(var, ldeg), p));
+	co.push_back(pow(coeff(var, base_ldeg), p));
 	for (int i=1; i<numcoeff; ++i) {
 		ex sum = _ex0;
 		for (int j=1; j<=i; ++j) {
-			ex c = coeff(var, j + ldeg);
+			ex c = coeff(var, j + base_ldeg);
 			if (is_order_function(c)) {
 				co.push_back(Order(_ex1));
 				break;
 			} else
 				sum += (p * j - (i - j)) * co[i - j] * c;
 		}
-		co.push_back(sum / coeff(var, ldeg) / i);
+		co.push_back(sum / coeff(var, base_ldeg) / i);
 	}
 	
 	// Construct new series (of non-zero coefficients)
 	epvector new_seq;
 	bool higher_order = false;
 	for (int i=0; i<numcoeff; ++i) {
-		if (!co[i].is_zero())
-			new_seq.emplace_back(expair(co[i], p * ldeg + i));
+		if (!co[i].is_zero()) {
+			new_seq.emplace_back(expair(co[i], new_ldeg + i));
+		}
 		if (is_order_function(co[i])) {
 			higher_order = true;
 			break;
 		}
 	}
-	if (!higher_order)
-		new_seq.emplace_back(expair(Order(_ex1), p * ldeg + numcoeff));
+	if (!higher_order && new_deg == deg) {
+		new_seq.emplace_back(expair{Order(_ex1), new_deg});
+	}
 
 	return pseries(relational(var,point), std::move(new_seq));
 }
@@ -1150,7 +1163,8 @@ ex power::series(const relational & r, int order, unsigned options) const
 
 	if (!(real_ldegree*numexp).is_integer())
 		throw std::runtime_error("pseries::power_const(): trying to assemble a Puiseux series");
-	ex e = basis.series(r, (order + real_ldegree*(1-numexp)).to_int(), options);
+	int extra_terms = (real_ldegree*(1-numexp)).to_int();
+	ex e = basis.series(r, order + std::max(0, extra_terms), options);
 	
 	ex result;
 	try {

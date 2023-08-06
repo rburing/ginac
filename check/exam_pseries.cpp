@@ -390,6 +390,24 @@ static unsigned exam_series14()
 	return result;
 }
 
+// Test expansion of powers of polynomials.
+static unsigned exam_series15()
+{
+	unsigned result = 0;
+
+	ex e = pow(x + pow(x,2), 2);
+
+	result += check_series(e, 0, Order(1), 0);
+	result += check_series(e, 0, Order(x), 1);
+	result += check_series(e, 0, Order(pow(x,2)), 2);
+	result += check_series(e, 0, pow(x,2) + Order(pow(x,3)), 3);
+	result += check_series(e, 0, pow(x,2) + 2*pow(x,3) + Order(pow(x,4)), 4);
+	result += check_series(e, 0, pow(x,2) + 2*pow(x,3) + pow(x,4), 5);
+	result += check_series(e, 0, pow(x,2) + 2*pow(x,3) + pow(x,4), 6);
+
+	return result;
+}
+
 unsigned exam_pseries()
 {
 	unsigned result = 0;
@@ -410,6 +428,7 @@ unsigned exam_pseries()
 	result += exam_series12();  cout << '.' << flush;
 	result += exam_series13();  cout << '.' << flush;
 	result += exam_series14();  cout << '.' << flush;
+	result += exam_series15();  cout << '.' << flush;
 	
 	return result;
 }
