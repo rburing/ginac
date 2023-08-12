@@ -1,6 +1,6 @@
 This file records noteworthy changes.
 
-1.8.7 (dd mm yyyy)
+1.8.7 (12 August 2023)
 * Fix series expansion of polynomial(x)^n for small and large n.
 * Fix bugs in internal parser from strings.
 * Make ginsh evaluate line-by-line in non-interactive mode.
